@@ -12,7 +12,7 @@ module processing_element#(
     parameter ACC_WIDTH  = 14   // width of accumulator
 )(
     input wire                      clk,
-    input wire                      rst,
+    input wire                      rst,    // reset PE, not global reset?
     input wire                      forward, 
     input wire  [DATA_WIDTH-1:0]    a_in,
     input wire  [DATA_WIDTH-1:0]    b_in,
@@ -25,7 +25,7 @@ module processing_element#(
 wire [2*DATA_WIDTH-1:0] product;
 wire [ACC_WIDTH-1:0] product_sum;
 
-assign product = a_reg * b_reg;         // Adder
+assign product = a_in * b_in;           // Adder
 assign product_sum = product + c_reg;   // Multiplier
 
 // A/B Register
