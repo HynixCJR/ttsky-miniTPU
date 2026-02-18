@@ -8,8 +8,8 @@
 //`include "params.vh"
 
 module processing_element#(
-    parameter DATA_WIDTH = 8,   // width of input operands
-    parameter ACC_WIDTH  = 18   // width of accumulator
+    parameter DATA_WIDTH = 6,   // width of input operands
+    parameter ACC_WIDTH  = 14   // width of accumulator
 )(
     input wire                      clk,
     input wire                      rst,
