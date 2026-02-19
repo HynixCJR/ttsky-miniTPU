@@ -1,6 +1,6 @@
 module systolic_array#(
     parameter DATA_WIDTH = 6,
-    parameter ARRAY_SIZE = 4,
+    parameter ARRAY_SIZE = 4
 ) (
     input wire                          clk,
     input wire                          rstn,
@@ -19,7 +19,10 @@ module systolic_array#(
     // I'm currently outputting the c_out for all PEs
     // bc I'm not entirely sure how it's being used later
     // Can fix it later on
-    output reg [DATA_WIDTH - 1: 0]      c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+        // editor's note: i changed this to bit width 14 instead of 6
+        // bc c_out is the PE psum, also i changed to wire instead of reg
+        // bc PE modules continuously drive these
+    output wire [DATA_WIDTH * 2 + 1: 0] c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1]
 
 );
 
@@ -72,7 +75,7 @@ module systolic_array#(
                     .b_in(matB_wires[rows][cols]),
                     .a_reg(matA_wires[rows][cols + 1]),
                     .b_reg(matB_wires[rows + 1][cols]),
-                    .c_reg(c_out[rows][cols]),
+                    .c_reg(c_out[rows][cols])
                 );
             end        
         end
