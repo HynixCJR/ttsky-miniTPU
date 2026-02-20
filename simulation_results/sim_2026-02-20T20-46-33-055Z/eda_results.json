@@ -1,0 +1,23 @@
+{
+  "stdout_truncated": false,
+  "stdout": "INFO: [EDA] eda: version 0.3.10\nINFO: [EDA] main: eda sim --no-color --tool verilator --seed=1 --verilate-args=-Wno-fatal --waves tb_IO_Interface; (run from /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd)\nINFO: [EDA] eda_config: --config-yml=eda_config_defaults.yml observed\nINFO: [EDA] eda_config: using config: /app/venv/lib/python3.12/site-packages/opencos/eda_config_defaults.yml\nINFO: [EDA] *** OpenCOS EDA ***\nINFO: [EDA] Detected verilator (/usr/local/bin/verilator)\nINFO: [EDA] sim: top-most target name: tb_IO_Interface\nINFO: [EDA] exec: /usr/local/bin/verilator --binary -Wno-CASEINCOMPLETE -Wno-REALCVT -Wno-SELRANGE -Wno-TIMESCALEMOD -Wno-UNSIGNED -Wno-WIDTH -Wno-fatal --timing --assert --autoflush -sv -CFLAGS -O1 -j 7 --trace-structs --trace-params --trace-fst -top tb_IO_Interface -o sim.exe +define+SIMULATION /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/test/tb_IO_Interface.v (in eda.work/tb_IO_Interface.sim, tee_fpath='compile.log')\nINFO: [EDA] PID 5960 for /usr/local/bin/verilator\n%Error: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v:30:5: syntax error, unexpected assign, expecting ';'\n   30 |     assign uio_oe = 8'b11110000;         \n      |     ^~~~~~\n        ... See the manual at https://verilator.org/verilator_doc.html?v=5.038 for more assistance.\n%Error: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v:34:5: syntax error, unexpected assign\n   34 |     assign raw_input_bus = {ui_in, uio_in[3:0]};\n      |     ^~~~~~\n%Error: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v:56:5: syntax error, unexpected IDENTIFIER-for-instance\n   56 |     handleOutput O1(\n      |     ^~~~~~~~~~~~\n%Error: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v:166:29: syntax error, unexpected <=\n  166 |                     outGPIO <= 12'd0;\n      |                             ^~\n%Error: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/src/IO_Interface.v:170:29: syntax error, unexpected <=\n  170 |                     outGPIO <= 12'd0;\n      |                             ^~\n%Error: Exiting due to 5 error(s)\nINFO: [EDA] subprocess_run_background: wrote: /app/eda.work/10cfb679-8e41-476e-af9d-701b2e1258f1.edacmd/eda.work/tb_IO_Interface.sim/compile.log\nINFO: [EDA] exec: returned with error (return code: 1)\nINFO: [EDA] Tool - verilator, total counts: 0 tool warnings, 6 tool errors\nERROR: [EDA] sim - verilator - tb_IO_Interface: exec returned with error code: 1\nINFO: [EDA] Wrote artifacts JSON: eda.work/tb_IO_Interface.sim/artifacts.json\nINFO: [EDA] Exiting with 0 warnings, 1 errors\nINFO: [EDA] Closing logfile: eda.work/eda.log\n",
+  "stdout_size": 2777,
+  "stdout_total_size": 2777,
+  "message": "Simulation failed with return code 255",
+  "warnings": 0,
+  "errors": 0,
+  "stderr": "",
+  "return_code": 255,
+  "start_time": 1771620392.5774863,
+  "stop_time": 1771620392.8773482,
+  "waves_returned": false,
+  "wave_file": null,
+  "wave_file_size": null,
+  "verilator_version": null,
+  "system_info": null,
+  "work_dir_files": null,
+  "frogger_status_reason": "Simulation failed with return code 255",
+  "fst_s3_key": null,
+  "fst_s3_bucket": null,
+  "error": "Simulation failed with return code 255"
+}

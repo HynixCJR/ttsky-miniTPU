@@ -25,7 +25,7 @@ module IO_interface(
 
     // control for the systolic array
     output wire startSysArray           // active high, pulse systolic array once all values are updated into registers
-)
+);
 
     assign uio_oe = 8'b11110000;        // set which bidirectional GPIO pins are being used for input and which for output
 
@@ -142,7 +142,7 @@ module handleOutput(
     input wire [11:0] out0, out1, out2, out3 // output buffer registers
 );
 
-    reg [1:0] state;                    // states for FSM
+    reg [2:0] state;                    // states for FSM
     parameter delay_one = 3'd0;         // on VERY FIRST two clock cycles, delay by two cycles, THEN start reading
     parameter delay_two = 3'd1;
     parameter first_buf = 3'd2;         // first_buf = output from first output buffer, second_buf = output from second output buffer, etc.
@@ -162,11 +162,11 @@ module handleOutput(
             if (state == first_buf) outGPIO <= 12'd0;
 
             case(state)
-                delay_one: begin:       // DELAY TWO CLOCK CYCLES AT THE BEGINNING before reading
+                delay_one: begin       // DELAY TWO CLOCK CYCLES AT THE BEGINNING before reading
                     outGPIO <= 12'd0;
                     state <= delay_two;
                 end
-                delay_two: begin:
+                delay_two: begin
                     outGPIO <= 12'd0;
                     state <= first_buf;
                 end
