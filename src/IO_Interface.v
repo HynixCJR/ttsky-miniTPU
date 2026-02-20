@@ -21,7 +21,6 @@ module IO_interface(
     output wire [5:0] col0_val, col1_val, col2_val, col3_val,
 
     // output logic
-    input wire sendOut,                 // pulse high = start sending out the values at output buffer registers
     input wire [11:0] out0, out1, out2, out3, // output buffer registers
 
     // control for the systolic array

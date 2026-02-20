@@ -5,3 +5,11 @@ tb_systolic_array_fsm:
     - src/systolic_array_fsm.sv
     - test/tb_systolic_array_fsm.sv
   top: tb_systolic_array_fsm
+
+# DEPS configuration for IO_Interface testbench
+
+tb_IO_Interface:
+  deps:
+    - src/IO_Interface.v
+    - test/tb_IO_Interface.v
+  top: tb_IO_Interface
