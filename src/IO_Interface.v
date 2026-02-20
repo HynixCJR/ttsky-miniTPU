@@ -141,7 +141,6 @@ module handleOutput(
     input wire rst_n,                   // active low
 
     output reg [11:0] outGPIO,          // 12 bit output GPIO
-    input wire sendOut,                 // enable for sending data out
     input wire [11:0] out0, out1, out2, out3 // output buffer registers
 );
 
@@ -160,17 +159,12 @@ module handleOutput(
         else if (ena) begin
             // by default just send 0s to output GPIO
             // assuming we haven't started a send loop
-            if (!sendOut && state == first_buf) outGPIO <= 12'd0;
+            if (state == first_buf) outGPIO <= 12'd0;
 
             case(state)
                 first_buf: begin
-                    if (sendOut) begin
-                        outGPIO <= out0;
-                        state <= second_buf;
-                    end else begin
-                        outGPIO <= 12'd0;
-                        state <= first_buf;
-                    end
+                    outGPIO <= out0;
+                    state <= second_buf;
                 end
                 second_buf: begin
                     outGPIO <= out1;

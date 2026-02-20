@@ -12,7 +12,7 @@ module processing_element#(
     parameter ACC_WIDTH  = 14   // width of accumulator
 )(
     input wire                      clk,
-    input wire                      rst,    // reset PE, not global reset?
+    input wire                      rst,    // GLOBAL RESET
     input wire                      forward, 
     input wire  [DATA_WIDTH-1:0]    a_in,
     input wire  [DATA_WIDTH-1:0]    b_in,
