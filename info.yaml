@@ -19,7 +19,7 @@ project:
   source_files:
     - "tt_um_4x4TPU.v"
     - "control_fsm.v"
-    - "IO_interface.v"
+    - "IO_Interface.v"
     - "PE.v"
     - "ReLU.v"
     - "systolic_array_fsm.sv"
