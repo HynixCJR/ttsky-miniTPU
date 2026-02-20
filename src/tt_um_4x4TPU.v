@@ -16,6 +16,15 @@ module tt_um_4x4TPU (
     input  wire       rst_n     // reset_n - low to reset
 );
 
+  parameter DATA_WIDTH = 6,   // width of input operands
+
+  // input buffers
+  reg [DATA_WIDTH - 1:0] row0_buffer, row1_buffer, row2_buffer, row3_buffer;
+  reg [DATA_WIDTH - 1:0] col0_buffer, col1_buffer, col2_buffer, col3_buffer;
+
+  // output buffers
+  reg [DATA_WIDTH * 2 - 1:0] output_buffer0, output_buffer1, output_buffer2, output_buffer3;
+
   // All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
