@@ -19,7 +19,7 @@ module processing_element #(
     input wire  [DATA_WIDTH-1:0]    b_in,
     output reg  [DATA_WIDTH-1:0]    a_reg,
     output reg  [DATA_WIDTH-1:0]    b_reg,
-    output reg  [PSUM_WIDTH-1:0]     c_reg
+    output reg  [PSUM_WIDTH-1:0]    c_reg
 );
 
 // Combinational MAC datapath
