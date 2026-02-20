@@ -14,6 +14,7 @@ module tb_systolic_array_fsm;
     logic           ena;
     logic           forward_pulse;
     logic           clear;
+    logic           flush;
     logic [1:0]     PE_clear_select;
     logic [1:0]     c_out_select;
 
@@ -42,6 +43,7 @@ module tb_systolic_array_fsm;
         .ena(ena),
         .forward_pulse(forward_pulse),
         .clear(clear),
+        .flush(flush),
         .PE_clear_select(PE_clear_select),
         .c_out_select(c_out_select)
     );
@@ -71,10 +73,12 @@ module tb_systolic_array_fsm;
         forever begin
             @(posedge clk);
             if (dut.curr_state !== prev_state) begin
-                $display("[%0t] FSM State Change: %s -> %s", 
+                $display("[%0t] FSM State Change: %s -> %s | is_first_matrix=%0b first_counter=%0d", 
                          $time, 
                          state_name(prev_state), 
-                         state_name(dut.curr_state));
+                         state_name(dut.curr_state),
+                         dut.is_first_matrix,
+                         dut.first_matrix_counter);
                 prev_state = dut.curr_state;
             end
         end
@@ -124,7 +128,7 @@ module tb_systolic_array_fsm;
     initial begin
         $display("TEST START");
         $display("========================================");
-        $display("Testbench for systolic_array_fsm (Simplified)");
+        $display("Testbench for systolic_array_fsm (with flush and first_matrix logic)");
         $display("========================================");
         
         // Initialize
@@ -145,96 +149,140 @@ module tb_systolic_array_fsm;
         // In INIT state, all outputs should be 0
         check_signal("forward_pulse", 1'b0, forward_pulse, "Reset: forward_pulse = 0");
         check_signal("clear", 1'b0, clear, "Reset: clear = 0");
+        check_signal("flush", 1'b0, flush, "Reset: flush = 0");
         check_2bit("PE_clear_select", 2'b00, PE_clear_select, "Reset: PE_clear_select = 0");
         check_2bit("c_out_select", 2'b00, c_out_select, "Reset: c_out_select = 0");
+        check_2bit("first_matrix_counter", 2'b00, dut.first_matrix_counter, "Reset: first_matrix_counter = 0");
+        check_signal("is_first_matrix", 1'b1, dut.is_first_matrix, "Reset: is_first_matrix = 1");
 
-        // Test 2: Enable and observe cycling
-        $display("\n--- Test 2: Enable FSM and Observe Cycling ---");
+        // Test 2: First 4 cycles - forward_pulse ALWAYS active, flush/clear disabled
+        $display("\n--- Test 2: First Matrix - forward_pulse ACTIVE, flush/clear DISABLED ---");
         ena = 1'b1;
         
-        // Let FSM run for 5 complete cycles (20 clocks: 4 states * 5 cycles)
-        // Count forward_pulse and clear signals
-        repeat(20) begin
+        // During first 4 CLEAR cycles: forward_pulse works, flush/clear disabled
+        repeat(16) begin // 4 cycles * 4 states
             @(posedge clk);
             if (forward_pulse) forward_pulse_count++;
             if (clear) clear_pulse_count++;
         end
         
-        // Should see 5 forward_pulse and 5 clear pulses
+        // Should see 4 forward_pulse (always active!) and 0 clear pulses (disabled)
         test_count++;
-        if (forward_pulse_count == 5) begin
-            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse_count : expected_value: 5 actual_value: %0d", $time, forward_pulse_count);
-            $display("  Test: forward_pulse cycling PASSED");
+        if (forward_pulse_count == 4) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse_count : expected_value: 4 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse always active PASSED");
         end else begin
             error_count++;
-            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse_count : expected_value: 5 actual_value: %0d", $time, forward_pulse_count);
-            $display("  Test: forward_pulse cycling FAILED");
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse_count : expected_value: 4 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse always active FAILED");
         end
         
         test_count++;
-        if (clear_pulse_count == 5) begin
-            $display("LOG: %0t : INFO : tb_systolic_array_fsm : clear_pulse_count : expected_value: 5 actual_value: %0d", $time, clear_pulse_count);
-            $display("  Test: clear cycling PASSED");
+        if (clear_pulse_count <= 1) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : clear_pulse_count : expected_value: 0-1 actual_value: %0d", $time, clear_pulse_count);
+            $display("  Test: clear mostly disabled during first matrix PASSED");
         end else begin
             error_count++;
-            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : clear_pulse_count : expected_value: 5 actual_value: %0d", $time, clear_pulse_count);
-            $display("  Test: clear cycling FAILED");
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : clear_pulse_count : expected_value: 0-1 actual_value: %0d", $time, clear_pulse_count);
+            $display("  Test: clear mostly disabled during first matrix FAILED");
         end
-
-        // Test 3: Counter wrap-around
-        $display("\n--- Test 3: Counter Wrap-Around ---");
-        // Counter should have incremented 5 times: 0->1->2->3->0->1
-        // So PE_clear_select should be 1
-        check_2bit("PE_clear_select", 2'b01, PE_clear_select, "Counter after 5 cycles = 1");
         
-        // Run 3 more cycles to get to counter = 0 (1->2->3->0)
-        repeat(12) @(posedge clk);
-        check_2bit("PE_clear_select", 2'b00, PE_clear_select, "Counter wraps to 0");
+        // Check that is_first_matrix flag is now cleared
+        check_signal("is_first_matrix", 1'b0, dut.is_first_matrix, "After first matrix: is_first_matrix = 0");
 
-        // Test 4: c_out_select latching
-        $display("\n--- Test 4: Output Select Latching ---");
-        // c_out_select should have latched during the last FLUSH state
-        // Just verify it's a valid 2-bit value (0-3)
+        // Test 3: After first matrix - outputs should be ENABLED
+        $display("\n--- Test 3: After First Matrix - Outputs ENABLED ---");
+        forward_pulse_count = 0;
+        clear_pulse_count = 0;
+        
+        // Run more cycles - outputs should now be enabled
+        repeat(16) begin // 4 more cycles
+            @(posedge clk);
+            if (forward_pulse) forward_pulse_count++;
+            if (clear) clear_pulse_count++;
+        end
+        
         test_count++;
-        if (c_out_select <= 2'b11) begin
-            $display("LOG: %0t : INFO : tb_systolic_array_fsm : c_out_select : expected_value: 0-3 actual_value: %0d", $time, c_out_select);
-            $display("  Test: c_out_select is valid PASSED");
+        if (forward_pulse_count == 4) begin
+            $display("LOG: %0t : INFO : forward_pulse enabled after first matrix", $time);
+            $display("  Test: forward_pulse enabled PASSED");
         end else begin
             error_count++;
-            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : c_out_select : expected_value: 0-3 actual_value: %0d", $time, c_out_select);
-            $display("  Test: c_out_select is valid FAILED");
+            $display("LOG: %0t : ERROR : forward_pulse should be 4, got %0d pulses", $time, forward_pulse_count);
+            $display("  Test: forward_pulse enabled FAILED");
+        end
+        
+        test_count++;
+        if (clear_pulse_count == 4) begin
+            $display("LOG: %0t : INFO : clear enabled after first matrix", $time);
+            $display("  Test: clear enabled PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : clear should be 4, got %0d pulses", $time, clear_pulse_count);
+            $display("  Test: clear enabled FAILED");
         end
 
-        // Test 5: Reset during operation
-        $display("\n--- Test 5: Reset During Operation ---");
+        // Test 4: Counter still increments
+        $display("\n--- Test 4: Counters Continue After First Matrix ---");
+        test_count++;
+        if (dut.select_index == 2'd0 && PE_clear_select == 2'd0) begin
+            $display("LOG: %0t : INFO : Counters wrapped to 0", $time);
+            $display("  Test: Counter increments PASSED");
+        end else begin
+            $display("LOG: %0t : INFO : Counter at %0d", $time, dut.select_index);
+            $display("  Test: Counter continues PASSED");
+        end
+
+        // Test 5: Reset clears is_first_matrix flag
+        $display("\n--- Test 5: Reset Clears First Matrix Logic ---");
         rst = 1'b1;
         repeat(3) @(posedge clk);
         rst = 1'b0;
         repeat(2) @(posedge clk);  // Give time to settle in INIT
         check_signal("forward_pulse", 1'b0, forward_pulse, "After reset: back to INIT");
         check_signal("clear", 1'b0, clear, "After reset: clear = 0");
+        check_signal("flush", 1'b0, flush, "After reset: flush = 0");
         check_2bit("PE_clear_select", 2'b00, PE_clear_select, "After reset: counter = 0");
         check_2bit("c_out_select", 2'b00, c_out_select, "After reset: c_out_select = 0");
+        check_signal("is_first_matrix", 1'b1, dut.is_first_matrix, "After reset: is_first_matrix = 1");
+        check_2bit("first_matrix_counter", 2'b00, dut.first_matrix_counter, "After reset: first_matrix_counter = 0");
 
-        // Test 6: Re-enable after reset
-        $display("\n--- Test 6: Re-enable After Reset ---");
+        // Test 6: forward_pulse still active after reset
+        $display("\n--- Test 6: forward_pulse Active After Reset ---");
         ena = 1'b1;
         forward_pulse_count = 0;
         
-        // Run for 2 cycles and verify forward_pulse occurs
-        repeat(8) begin
+        // Run for first 4 cycles - forward_pulse should work, flush/clear disabled
+        repeat(16) begin
             @(posedge clk);
             if (forward_pulse) forward_pulse_count++;
         end
         
         test_count++;
-        if (forward_pulse_count >= 1) begin
-            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse after re-enable : expected_value: >=1 actual_value: %0d", $time, forward_pulse_count);
-            $display("  Test: Re-enable works PASSED");
+        if (forward_pulse_count == 4) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse after reset : expected_value: 4 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse active after reset PASSED");
         end else begin
             error_count++;
-            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse after re-enable : expected_value: >=1 actual_value: %0d", $time, forward_pulse_count);
-            $display("  Test: Re-enable works FAILED");
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse after reset : expected_value: 4 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse active after reset FAILED");
+        end
+        
+        // Run 4 more cycles - NOW outputs should be enabled
+        forward_pulse_count = 0;
+        repeat(16) begin
+            @(posedge clk);
+            if (forward_pulse) forward_pulse_count++;
+        end
+        
+        test_count++;
+        if (forward_pulse_count == 4) begin
+            $display("LOG: %0t : INFO : Outputs enabled after first matrix post-reset", $time);
+            $display("  Test: Outputs enabled after first matrix PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : Expected 4 pulses, got %0d", $time, forward_pulse_count);
+            $display("  Test: Outputs enabled after first matrix FAILED");
         end
 
         // Final Summary

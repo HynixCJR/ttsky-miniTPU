@@ -28,6 +28,7 @@ module systolic_array_fsm#(
 
     output logic                    forward_pulse,      // Send forward Pulse to all PE
     output logic                    clear,              // Clear the selected PE 
+    output logic                    flush,              // Signal to store psum into output buffer
     output logic [1:0]              PE_clear_select,    // Select which PE to reset
     output logic [1:0]              c_out_select        // Select which c_out to store in output buffer
 );
@@ -42,8 +43,10 @@ typedef enum logic [2:0] {
 } systo_state_t;
 systo_state_t curr_state, next_state;
 
-// 4 SELECT Cases
-logic [1:0] select_index;  // 0 to 3
+
+logic [1:0] select_index;           // 0 to 3
+logic [1:0] first_matrix_counter;   // 0 to 3
+logic is_first_matrix;              // T/F
 
 //==FSM==================================================
 
@@ -83,22 +86,41 @@ end
 // Select Counter:
 always_ff @(posedge clk or posedge rst) begin
     if (rst)
-        select_index <= 2'd0;
+        select_index <= 2'd1;
     else if (curr_state == CLEAR)
         select_index <= select_index + 1'b1;
 end
 
+// First matrix Counter: (Do not flush or clear the first matrix)
+always_ff @(posedge clk or posedge rst) begin
+    if (rst)
+        first_matrix_counter <= 2'd0;
+    else if (curr_state == CLEAR)
+        first_matrix_counter <= first_matrix_counter + 1'b1;
+end
+
+// is_first_matrix
+always_ff @(posedge clk or posedge rst) begin
+    if (rst)
+        is_first_matrix <= 1'b1;
+    else if (first_matrix_counter == 2'd3)
+        is_first_matrix <= 1'b0;
+end
 
 // Output Wires ============================
 always_comb begin
-    case(curr_state)                            
-        UPDATE:     forward_pulse = 1'b1;       // forward_pulse
-        CLEAR:      clear = 1'b1;
-        default: begin    
-                    forward_pulse = '0;
-                    clear = '0;
-        end
-    endcase
+    forward_pulse = '0;
+    flush = '0;
+    clear = '0;
+    if(curr_state == UPDATE) 
+        forward_pulse = 1'b1;       // forward_pulse
+    if(!is_first_matrix) begin
+        case(curr_state)                            
+            FLUSH:      flush = 1'b1;               // flush pulse
+            CLEAR:      clear = 1'b1;               // clear pulse
+            default: ;
+        endcase
+    end
 end
 
 assign PE_clear_select = select_index;          // PE_clear_select
