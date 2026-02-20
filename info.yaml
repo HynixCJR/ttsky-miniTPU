@@ -21,7 +21,7 @@ project:
     - "control_fsm.v"
     - "IO_Interface.v"
     - "PE.v"
-    - "output_buffer.v"
+    - "output_buffer.sv"
     - "systolic_array_fsm.sv"
     - "systolic_array_mux.sv"
     - "systolic_array.sv"
