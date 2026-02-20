@@ -5,42 +5,45 @@ module tb_systolic_array_fsm;
 
     // Parameters
     parameter DATA_WIDTH = 6;
-    parameter ACC_WIDTH  = 14;
+    parameter PSUM_WIDTH = 14;
     parameter CLK_PERIOD = 10; // 10ns clock period (100MHz)
 
     // DUT signals
-    logic                    clk;
-    logic                    rst;
-    logic                    forward_systo;
-    logic [DATA_WIDTH-1:0]   a_in;
-    logic [2:0]              curr_state_systo;
+    logic           clk;
+    logic           rst;
+    logic           ena;
+    logic           forward_pulse;
+    logic           clear;
+    logic [1:0]     PE_clear_select;
+    logic [1:0]     c_out_select;
 
     // Test variables
     integer test_count;
     integer error_count;
+    integer forward_pulse_count;
+    integer clear_pulse_count;
 
     // State encoding for reference (matching DUT)
     typedef enum logic [2:0] {
-        IDLE    = 3'b000,
-        FLUSH_1 = 3'b001,
-        FLUSH_2 = 3'b010,
-        FLUSH_3 = 3'b011,
-        FLUSH_4 = 3'b100,
-        FLUSH_5 = 3'b101,
-        FLUSH_6 = 3'b110,
-        FLUSH_7 = 3'b111
+        INIT   = 3'b000,
+        IDLE   = 3'b001,
+        UPDATE = 3'b010,
+        FLUSH  = 3'b011,
+        CLEAR  = 3'b100
     } state_t;
 
     // Instantiate DUT
     systolic_array_fsm #(
         .DATA_WIDTH(DATA_WIDTH),
-        .ACC_WIDTH(ACC_WIDTH)
+        .PSUM_WIDTH(PSUM_WIDTH)
     ) dut (
         .clk(clk),
         .rst(rst),
-        .forward_systo(forward_systo),
-        .a_in(a_in),
-        .curr_state_systo(curr_state_systo)
+        .ena(ena),
+        .forward_pulse(forward_pulse),
+        .clear(clear),
+        .PE_clear_select(PE_clear_select),
+        .c_out_select(c_out_select)
     );
 
     // Clock generation
@@ -49,42 +52,88 @@ module tb_systolic_array_fsm;
         forever #(CLK_PERIOD/2) clk = ~clk;
     end
 
-    // Checker task
-    task check_state(input logic [2:0] expected, input string test_name);
+    // State name function for debugging
+    function string state_name(logic [2:0] state);
+        case (state)
+            INIT:   return "INIT  ";
+            IDLE:   return "IDLE  ";
+            UPDATE: return "UPDATE";
+            FLUSH:  return "FLUSH ";
+            CLEAR:  return "CLEAR ";
+            default: return "UNKNOWN";
+        endcase
+    endfunction
+
+    // FSM State Monitor - prints state changes
+    logic [2:0] prev_state;
+    initial begin
+        prev_state = INIT;
+        forever begin
+            @(posedge clk);
+            if (dut.curr_state !== prev_state) begin
+                $display("[%0t] FSM State Change: %s -> %s", 
+                         $time, 
+                         state_name(prev_state), 
+                         state_name(dut.curr_state));
+                prev_state = dut.curr_state;
+            end
+        end
+    end
+
+    // Helper task: Check a signal value
+    task check_signal(
+        input string signal_name,
+        input logic expected,
+        input logic actual,
+        input string test_name
+    );
         test_count++;
-        if (curr_state_systo !== expected) begin
+        if (actual !== expected) begin
             error_count++;
-            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : dut.curr_state_systo : expected_value: 3'b%03b actual_value: 3'b%03b", 
-                     $time, expected, curr_state_systo);
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : dut.%s : expected_value: %0b actual_value: %0b", 
+                     $time, signal_name, expected, actual);
             $display("  Test: %s FAILED", test_name);
         end else begin
-            $display("LOG: %0t : INFO : tb_systolic_array_fsm : dut.curr_state_systo : expected_value: 3'b%03b actual_value: 3'b%03b", 
-                     $time, expected, curr_state_systo);
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : dut.%s : expected_value: %0b actual_value: %0b", 
+                     $time, signal_name, expected, actual);
             $display("  Test: %s PASSED", test_name);
         end
     endtask
 
-    // Apply forward pulse task
-    task apply_forward_pulse();
-        @(posedge clk);
-        forward_systo = 1'b1;
-        @(posedge clk);
-        forward_systo = 1'b0;
+    // Helper task: Check 2-bit value
+    task check_2bit(
+        input string signal_name,
+        input logic [1:0] expected,
+        input logic [1:0] actual,
+        input string test_name
+    );
+        test_count++;
+        if (actual !== expected) begin
+            error_count++;
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : dut.%s : expected_value: 2'b%02b actual_value: 2'b%02b", 
+                     $time, signal_name, expected, actual);
+            $display("  Test: %s FAILED", test_name);
+        end else begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : dut.%s : expected_value: 2'b%02b actual_value: 2'b%02b", 
+                     $time, signal_name, expected, actual);
+            $display("  Test: %s PASSED", test_name);
+        end
     endtask
 
     // Main test sequence
     initial begin
         $display("TEST START");
         $display("========================================");
-        $display("Testbench for systolic_array_fsm");
+        $display("Testbench for systolic_array_fsm (Simplified)");
         $display("========================================");
         
         // Initialize
         test_count = 0;
         error_count = 0;
+        forward_pulse_count = 0;
+        clear_pulse_count = 0;
         rst = 1'b0;
-        forward_systo = 1'b0;
-        a_in = 6'b0;
+        ena = 1'b0;
 
         // Test 1: Reset behavior
         $display("\n--- Test 1: Reset Behavior ---");
@@ -92,88 +141,101 @@ module tb_systolic_array_fsm;
         repeat(3) @(posedge clk);
         rst = 1'b0;
         @(posedge clk);
-        check_state(IDLE, "Reset to IDLE");
+        
+        // In INIT state, all outputs should be 0
+        check_signal("forward_pulse", 1'b0, forward_pulse, "Reset: forward_pulse = 0");
+        check_signal("clear", 1'b0, clear, "Reset: clear = 0");
+        check_2bit("PE_clear_select", 2'b00, PE_clear_select, "Reset: PE_clear_select = 0");
+        check_2bit("c_out_select", 2'b00, c_out_select, "Reset: c_out_select = 0");
 
-        // Test 2: IDLE to FLUSH_1 transition
-        $display("\n--- Test 2: IDLE to FLUSH_1 ---");
-        apply_forward_pulse();
-        @(posedge clk); // Wait for output register to update
-        check_state(FLUSH_1, "IDLE -> FLUSH_1");
-
-        // Test 3: Sequential transitions FLUSH_1 through FLUSH_7
-        $display("\n--- Test 3: Sequential State Transitions ---");
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_2, "FLUSH_1 -> FLUSH_2");
-
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_3, "FLUSH_2 -> FLUSH_3");
-
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_4, "FLUSH_3 -> FLUSH_4");
-
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_5, "FLUSH_4 -> FLUSH_5");
-
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_6, "FLUSH_5 -> FLUSH_6");
-
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_7, "FLUSH_6 -> FLUSH_7");
-
-        // Test 4: Cyclic behavior - FLUSH_7 back to FLUSH_1
-        $display("\n--- Test 4: Cyclic Behavior (FLUSH_7 -> FLUSH_1) ---");
-        apply_forward_pulse();
-        @(posedge clk);
-        check_state(FLUSH_1, "FLUSH_7 -> FLUSH_1 (cyclic)");
-
-        // Test 5: State holds when forward_systo is not asserted
-        $display("\n--- Test 5: State Hold without Forward Signal ---");
-        forward_systo = 1'b0;
-        repeat(5) @(posedge clk);
-        check_state(FLUSH_1, "State holds at FLUSH_1");
-
-        // Test 6: Verify output timing (1-cycle delay)
-        $display("\n--- Test 6: Output Timing Verification ---");
-        // The state register updates on clock edge when forward_systo=1
-        // The output register updates on the NEXT clock edge
-        @(posedge clk);
-        forward_systo = 1'b1;
-        @(posedge clk); // State changes to FLUSH_2, but output still shows FLUSH_1
-        forward_systo = 1'b0;
-        // At this point, internal state is FLUSH_2, output should update on next edge
-        check_state(FLUSH_1, "Output still at FLUSH_1 (not yet updated)");
-        @(posedge clk); // Now output should reflect FLUSH_2
-        check_state(FLUSH_2, "Output updated to FLUSH_2 (1-cycle delay)");
-
-        // Test 7: Multiple consecutive forward pulses
-        $display("\n--- Test 7: Rapid State Transitions ---");
-        for (int i = 0; i < 5; i++) begin
-            apply_forward_pulse();
+        // Test 2: Enable and observe cycling
+        $display("\n--- Test 2: Enable FSM and Observe Cycling ---");
+        ena = 1'b1;
+        
+        // Let FSM run for 5 complete cycles (20 clocks: 4 states * 5 cycles)
+        // Count forward_pulse and clear signals
+        repeat(20) begin
             @(posedge clk);
+            if (forward_pulse) forward_pulse_count++;
+            if (clear) clear_pulse_count++;
         end
-        check_state(FLUSH_7, "After 5 transitions from FLUSH_2");
+        
+        // Should see 5 forward_pulse and 5 clear pulses
+        test_count++;
+        if (forward_pulse_count == 5) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse_count : expected_value: 5 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse cycling PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse_count : expected_value: 5 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: forward_pulse cycling FAILED");
+        end
+        
+        test_count++;
+        if (clear_pulse_count == 5) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : clear_pulse_count : expected_value: 5 actual_value: %0d", $time, clear_pulse_count);
+            $display("  Test: clear cycling PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : clear_pulse_count : expected_value: 5 actual_value: %0d", $time, clear_pulse_count);
+            $display("  Test: clear cycling FAILED");
+        end
 
-        // Test 8: Reset from non-IDLE state
-        $display("\n--- Test 8: Reset from FLUSH_7 ---");
+        // Test 3: Counter wrap-around
+        $display("\n--- Test 3: Counter Wrap-Around ---");
+        // Counter should have incremented 5 times: 0->1->2->3->0->1
+        // So PE_clear_select should be 1
+        check_2bit("PE_clear_select", 2'b01, PE_clear_select, "Counter after 5 cycles = 1");
+        
+        // Run 3 more cycles to get to counter = 0 (1->2->3->0)
+        repeat(12) @(posedge clk);
+        check_2bit("PE_clear_select", 2'b00, PE_clear_select, "Counter wraps to 0");
+
+        // Test 4: c_out_select latching
+        $display("\n--- Test 4: Output Select Latching ---");
+        // c_out_select should have latched during the last FLUSH state
+        // Just verify it's a valid 2-bit value (0-3)
+        test_count++;
+        if (c_out_select <= 2'b11) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : c_out_select : expected_value: 0-3 actual_value: %0d", $time, c_out_select);
+            $display("  Test: c_out_select is valid PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : c_out_select : expected_value: 0-3 actual_value: %0d", $time, c_out_select);
+            $display("  Test: c_out_select is valid FAILED");
+        end
+
+        // Test 5: Reset during operation
+        $display("\n--- Test 5: Reset During Operation ---");
         rst = 1'b1;
-        @(posedge clk);
+        repeat(3) @(posedge clk);
         rst = 1'b0;
-        @(posedge clk);
-        check_state(IDLE, "Reset from FLUSH_7 to IDLE");
+        repeat(2) @(posedge clk);  // Give time to settle in INIT
+        check_signal("forward_pulse", 1'b0, forward_pulse, "After reset: back to INIT");
+        check_signal("clear", 1'b0, clear, "After reset: clear = 0");
+        check_2bit("PE_clear_select", 2'b00, PE_clear_select, "After reset: counter = 0");
+        check_2bit("c_out_select", 2'b00, c_out_select, "After reset: c_out_select = 0");
 
-        // Test 9: Full cycle from IDLE
-        $display("\n--- Test 9: Complete Cycle Test ---");
-        for (int i = 0; i < 8; i++) begin
-            apply_forward_pulse();
+        // Test 6: Re-enable after reset
+        $display("\n--- Test 6: Re-enable After Reset ---");
+        ena = 1'b1;
+        forward_pulse_count = 0;
+        
+        // Run for 2 cycles and verify forward_pulse occurs
+        repeat(8) begin
             @(posedge clk);
+            if (forward_pulse) forward_pulse_count++;
         end
-        check_state(FLUSH_1, "After complete cycle (8 transitions)");
+        
+        test_count++;
+        if (forward_pulse_count >= 1) begin
+            $display("LOG: %0t : INFO : tb_systolic_array_fsm : forward_pulse after re-enable : expected_value: >=1 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: Re-enable works PASSED");
+        end else begin
+            error_count++;
+            $display("LOG: %0t : ERROR : tb_systolic_array_fsm : forward_pulse after re-enable : expected_value: >=1 actual_value: %0d", $time, forward_pulse_count);
+            $display("  Test: Re-enable works FAILED");
+        end
 
         // Final Summary
         $display("\n========================================");

@@ -1,7 +1,11 @@
 /*
 * Systolic Array FSM
-* One process
-* 6 States: IDLE and 7 FLUSH state 
+* Two process
+* 4 States:     
+    IDLE,
+    UPDATE,
+    FLUSH,
+    CLEAR
 * 
 * Next State when receive a forward_systo = 1 signal
 * NOTE: Must be high for only one clock period
@@ -30,6 +34,7 @@ module systolic_array_fsm#(
 
 // Define 4 states
 typedef enum logic [2:0] {
+    INIT,
     IDLE,
     UPDATE,
     FLUSH,
@@ -45,7 +50,7 @@ logic [1:0] select_index;  // 0 to 3
 // State Register:
 always_ff @(posedge clk or posedge rst) begin
     if(rst) begin
-        curr_state <= IDLE;
+        curr_state <= INIT;
     end
     else begin
         curr_state <= next_state;
@@ -57,8 +62,8 @@ always_comb begin
     next_state = curr_state;
 
     case (curr_state)
-        IDLE:
-            if (forward_pulse)
+        INIT:
+            if (ena)
                 next_state = UPDATE;
 
         UPDATE:
@@ -68,6 +73,9 @@ always_comb begin
             next_state = CLEAR;
 
         CLEAR:
+            next_state = IDLE;
+
+        IDLE:
             next_state = UPDATE;
     endcase
 end
@@ -93,13 +101,15 @@ always_comb begin
     endcase
 end
 
-assign PE_clear_select = select_index;            // PE_clear_select
+assign PE_clear_select = select_index;          // PE_clear_select
+assign c_out_select = select_index;             // c_out_select
 
+/*
 always_ff @(posedge clk or posedge rst) begin   // c_out_select
     if (rst)
         c_out_select <= 2'd0;
     else if (curr_state == FLUSH)
         c_out_select <= select_index;
 end
-
+*/
 endmodule
