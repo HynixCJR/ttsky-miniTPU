@@ -36,10 +36,10 @@ module systolic_array_fsm#(
 // Define 4 states
 typedef enum logic [2:0] {
     INIT,
-    IDLE,
     UPDATE,
     FLUSH,
-    CLEAR
+    CLEAR,
+    IDLE
 } systo_state_t;
 systo_state_t curr_state, next_state;
 
