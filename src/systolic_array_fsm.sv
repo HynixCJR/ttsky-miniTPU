@@ -18,12 +18,13 @@ module systolic_array_fsm#(
     parameter DATA_WIDTH = 6,   // width of input operands
     parameter PSUM_WIDTH  = 14  // width of accumulator
 )(
-    input wire                      clk,            
-    input wire                      rst,            // reset PE, not global reset?
-    input wire                      ena,            // Starts the Systolic Array
+    input logic                     clk,            
+    input logic                     rst,                // Global reset
+    input logic                     ena,                // Starts the Systolic Array
 
     output logic                    forward_pulse,      // Send forward Pulse to all PE
-    output logic [1:0]              PE_rst_select,      // Select which PE to reset
+    output logic                    clear,              // Clear the selected PE 
+    output logic [1:0]              PE_clear_select,    // Select which PE to reset
     output logic [1:0]              c_out_select        // Select which c_out to store in output buffer
 );
 
@@ -32,7 +33,7 @@ typedef enum logic [2:0] {
     IDLE,
     UPDATE,
     FLUSH,
-    RESET
+    CLEAR
 } systo_state_t;
 systo_state_t curr_state, next_state;
 
@@ -64,9 +65,9 @@ always_comb begin
             next_state = FLUSH;
 
         FLUSH:
-            next_state = RESET;
+            next_state = CLEAR;
 
-        RESET:
+        CLEAR:
             next_state = UPDATE;
     endcase
 end
@@ -75,20 +76,24 @@ end
 always_ff @(posedge clk or posedge rst) begin
     if (rst)
         select_index <= 2'd0;
-    else if (curr_state == RESET)
+    else if (curr_state == CLEAR)
         select_index <= select_index + 1'b1;
 end
 
 
 // Output Wires ============================
 always_comb begin
-    case(curr_state)                            // forward_pulse
-        UPDATE:     forward_pulse = 1'b1;
-        default:    forward_pulse = '0;
+    case(curr_state)                            
+        UPDATE:     forward_pulse = 1'b1;       // forward_pulse
+        CLEAR:      clear = 1'b1;
+        default: begin    
+                    forward_pulse = '0;
+                    clear = '0;
+        end
     endcase
 end
 
-assign PE_rst_select = select_index;            // PE_rst_select
+assign PE_clear_select = select_index;            // PE_clear_select
 
 always_ff @(posedge clk or posedge rst) begin   // c_out_select
     if (rst)
