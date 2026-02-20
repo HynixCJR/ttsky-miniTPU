@@ -3,7 +3,7 @@ project:
   title:        "4x4 TPU"      # Project title
   author:       "Albert Huang, Matthew Kong, Jiya Nair, Rivera Wijaya"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "4x4 Matrix multiplier for neural network processing"      # One line description of what your project does
+  description:  "A Tensor Processing Unit capable of computing 4x4 INT6 matrix multiplication with very high throughput"      # One line description of what your project does
   language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     33000000      # Clock frequency in Hz (or 0 if not applicable)
 
@@ -21,7 +21,7 @@ project:
     - "control_fsm.v"
     - "IO_Interface.v"
     - "PE.v"
-    - "ReLU.v"
+    - "output_buffer.v"
     - "systolic_array_fsm.sv"
     - "systolic_array_mux.sv"
     - "systolic_array.sv"
