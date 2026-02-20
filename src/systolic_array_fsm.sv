@@ -1,7 +1,7 @@
 /*
 * Systolic Array FSM
 * One process
-* 8 States: IDLE and 7 FLUSH state 
+* 6 States: IDLE and 7 FLUSH state 
 * 
 * Next State when receive a forward_systo = 1 signal
 * NOTE: Must be high for only one clock period
@@ -16,58 +16,85 @@
 
 module systolic_array_fsm#(
     parameter DATA_WIDTH = 6,   // width of input operands
-    parameter ACC_WIDTH  = 14   // width of accumulator
+    parameter PSUM_WIDTH  = 14  // width of accumulator
 )(
-    input wire                      clk,
-    input wire                      rst,    // reset PE, not global reset?
-    input wire                      forward_systo , 
-    input logic  [DATA_WIDTH-1:0]   a_in,
-    output logic [2:0]              curr_state_systo 
+    input wire                      clk,            
+    input wire                      rst,            // reset PE, not global reset?
+    input wire                      ena,            // Starts the Systolic Array
+
+    output logic                    forward_pulse,      // Send forward Pulse to all PE
+    output logic [1:0]              PE_rst_select,      // Select which PE to reset
+    output logic [1:0]              c_out_select        // Select which c_out to store in output buffer
 );
 
-// Define 8 states
+// Define 4 states
 typedef enum logic [2:0] {
     IDLE,
-    FLUSH_1,
-    FLUSH_2,
-    FLUSH_3,
-    FLUSH_4,
-    FLUSH_5,
-    FLUSH_6,
-    FLUSH_7
+    UPDATE,
+    FLUSH,
+    RESET
 } systo_state_t;
-systo_state_t curr_state;
+systo_state_t curr_state, next_state;
 
-// State Register
+// 4 SELECT Cases
+logic [1:0] select_index;  // 0 to 3
+
+//==FSM==================================================
+
+// State Register:
 always_ff @(posedge clk or posedge rst) begin
     if(rst) begin
         curr_state <= IDLE;
     end
-    // Next State Logic
-    else if (forward_systo) begin
-        case (curr_state)
-            IDLE:       curr_state <= FLUSH_1;
-            FLUSH_1:    curr_state <= FLUSH_2;
-            FLUSH_2:    curr_state <= FLUSH_3;
-            FLUSH_3:    curr_state <= FLUSH_4;
-            FLUSH_4:    curr_state <= FLUSH_5;
-            FLUSH_5:    curr_state <= FLUSH_6;
-            FLUSH_6:    curr_state <= FLUSH_7;
-            FLUSH_7:    curr_state <= FLUSH_1;
-        endcase
+    else begin
+        curr_state <= next_state;
     end
 end
 
-// Output Register
-// NOTE: The state update is reflected on the next clock cycle!!!!!
-always_ff @(posedge clk or posedge rst) begin
-    if (rst)
-        curr_state_systo <= 1'b0;
-    else
-        curr_state_systo <= curr_state;
+// Next-state logic:
+always_comb begin
+    next_state = curr_state;
+
+    case (curr_state)
+        IDLE:
+            if (forward_pulse)
+                next_state = UPDATE;
+
+        UPDATE:
+            next_state = FLUSH;
+
+        FLUSH:
+            next_state = RESET;
+
+        RESET:
+            next_state = UPDATE;
+    endcase
 end
 
-// Combinational Output:
-// assign curr_state_systo = curr_state;
+// Select Counter:
+always_ff @(posedge clk or posedge rst) begin
+    if (rst)
+        select_index <= 2'd0;
+    else if (curr_state == RESET)
+        select_index <= select_index + 1'b1;
+end
+
+
+// Output Wires ============================
+always_comb begin
+    case(curr_state)                            // forward_pulse
+        UPDATE:     forward_pulse = 1'b1;
+        default:    forward_pulse = '0;
+    endcase
+end
+
+assign PE_rst_select = select_index;            // PE_rst_select
+
+always_ff @(posedge clk or posedge rst) begin   // c_out_select
+    if (rst)
+        c_out_select <= 2'd0;
+    else if (curr_state == FLUSH)
+        c_out_select <= select_index;
+end
 
 endmodule

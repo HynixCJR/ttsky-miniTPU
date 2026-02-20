@@ -1,0 +1,7 @@
+# DEPS configuration for systolic_array_fsm testbench
+
+tb_systolic_array_fsm:
+  deps:
+    - src/systolic_array_fsm.sv
+    - test/tb_systolic_array_fsm.sv
+  top: tb_systolic_array_fsm
