@@ -1,11 +1,17 @@
-module systolic_array#(
-    parameter DATA_WIDTH = 6,
+// Maybe make the reset into individual nets
+// 
+
+module systolic_array #(
+    parameter DATA_WIDTH = 6,   // width of input operands
+    parameter PSUM_WIDTH  = 14, // width of accumulator
     parameter ARRAY_SIZE = 4
 ) (
     input wire                          clk,
-    input wire                          rstn,
-    input wire                          forward_systo,
+    input wire                          rst,                // Global reset
+    
+    input wire                          forward_systo,      // From Systolic Array FSM, connected to all PE
 
+    // A/BInput from Input Buffer
     input wire [DATA_WIDTH - 1:0]       row0_val,
     input wire [DATA_WIDTH - 1:0]       row1_val,
     input wire [DATA_WIDTH - 1:0]       row2_val,
@@ -16,34 +22,32 @@ module systolic_array#(
     input wire [DATA_WIDTH - 1:0]       col2_val,
     input wire [DATA_WIDTH - 1:0]       col3_val,
 
-    // I'm currently outputting the c_out for all PEs
-    // bc I'm not entirely sure how it's being used later
-    // Can fix it later on
-        // editor's note: i changed this to bit width 14 instead of 6
-        // bc c_out is the PE psum, also i changed to wire instead of reg
-        // bc PE modules continuously drive these
-    output wire [DATA_WIDTH * 2 + 1: 0] c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1]
+    // clear signal for all PEs
+    input wire                          PE_clear [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+
+    // c_out for each PEs
+    output wire [PSUM_WIDTH-1: 0] c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1]
 
 );
 
     /* Systolic array
+        B
+      A
              |      |      |      |
              V      V      V      V
-        -->PE11-->PE12-->PE13-->PE14-->
+        -->PE00-->PE01-->PE02-->PE03-->
              |      |      |      |
              V      V      V      V
-        -->PE21-->PE22-->PE23-->PE24-->
+        -->PE10-->PE11-->PE12-->PE13-->
              |      |      |      |
              V      V      V      V
-        -->PE31-->PE32-->PE33-->PE34-->
+        -->PE20-->PE21-->PE22-->PE23-->
              |      |      |      |
              V      V      V      V
-        -->PE41-->PE42-->PE43-->PE44-->
+        -->PE30-->PE31-->PE32-->PE33-->
              |      |      |      |
              V      V      V      V
-
     */
-
 
     // 2D array (including output wires here)
     wire [DATA_WIDTH - 1: 0] matA_wires [0:ARRAY_SIZE - 1][0:ARRAY_SIZE]; // [rows][cols]
@@ -69,8 +73,8 @@ module systolic_array#(
             for (cols = 0; cols < ARRAY_SIZE; cols = cols + 1) begin
                 processing_element u1 (
                     .clk(clk),
-                    .rst(!rstn),
-                    .forward(forward_systo), // am not sure if this is the enable signal
+                    .rst(rst),
+                    .forward(forward_systo),                    // am not sure if this is the enable signal
                     .a_in(matA_wires[rows][cols]),
                     .b_in(matB_wires[rows][cols]),
                     .a_reg(matA_wires[rows][cols + 1]),

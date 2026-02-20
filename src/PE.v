@@ -7,23 +7,24 @@
 `default_nettype none
 //`include "params.vh"
 
-module processing_element#(
-    parameter DATA_WIDTH = 6,   // width of input operands
-    parameter ACC_WIDTH  = 14   // width of accumulator
+module processing_element #(
+    parameter DATA_WIDTH = 6,       // width of input operands
+    parameter PSUM_WIDTH  = 14      // width of accumulator
 )(
     input wire                      clk,
     input wire                      rst,    // GLOBAL RESET
+    input wire                      clear,
     input wire                      forward, 
     input wire  [DATA_WIDTH-1:0]    a_in,
     input wire  [DATA_WIDTH-1:0]    b_in,
     output reg  [DATA_WIDTH-1:0]    a_reg,
     output reg  [DATA_WIDTH-1:0]    b_reg,
-    output reg  [ACC_WIDTH-1:0]     c_reg
+    output reg  [PSUM_WIDTH-1:0]     c_reg
 );
 
 // Combinational MAC datapath
 wire [2*DATA_WIDTH-1:0] product;
-wire [ACC_WIDTH-1:0] product_sum;
+wire [PSUM_WIDTH-1:0] product_sum;
 
 assign product = a_in * b_in;           // Adder
 assign product_sum = product + c_reg;   // Multiplier
@@ -46,7 +47,11 @@ always @(posedge clk)
 begin: Accumulate_Register
     if(rst) begin
         c_reg <= '0;
-    end else if (forward) begin
+    end 
+    else if (clear) begin
+        c_reg <= '0;
+    end
+    else if (forward) begin
         // Load the product_sum into c_reg
         c_reg <= product_sum;
     end
