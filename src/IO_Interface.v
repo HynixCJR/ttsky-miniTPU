@@ -58,7 +58,6 @@ module IO_interface(
         .ena(ena),
         .rst_n(rst_n),
         .outGPIO(output_bus),
-        .sendOut(sendOut),
         .out0(out0),
         .out1(out1),
         .out2(out2),
@@ -144,10 +143,12 @@ module handleOutput(
 );
 
     reg [1:0] state;                    // states for FSM
-    parameter first_buf = 2'd0;         // first_buf = output from first output buffer, second_buf = output from second output buffer, etc.
-    parameter second_buf = 2'd1;
-    parameter third_buf = 2'd2;
-    parameter fourth_buf = 2'd3;
+    parameter delay_one = 3'd0;         // on VERY FIRST two clock cycles, delay by two cycles, THEN start reading
+    parameter delay_two = 3'd1;
+    parameter first_buf = 3'd2;         // first_buf = output from first output buffer, second_buf = output from second output buffer, etc.
+    parameter second_buf = 3'd3;
+    parameter third_buf = 3'd4;
+    parameter fourth_buf = 3'd5;
 
     always@(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -161,6 +162,14 @@ module handleOutput(
             if (state == first_buf) outGPIO <= 12'd0;
 
             case(state)
+                delay_one: begin:       // DELAY TWO CLOCK CYCLES AT THE BEGINNING before reading
+                    outGPIO <= 12'd0;
+                    state <= delay_two;
+                end
+                delay_two: begin:
+                    outGPIO <= 12'd0;
+                    state <= first_buf;
+                end
                 first_buf: begin
                     outGPIO <= out0;
                     state <= second_buf;
