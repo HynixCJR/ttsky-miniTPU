@@ -2,15 +2,20 @@
 // saves all four psums through ReLU into the four output buffers
 // all of this happens immediately because it is simply non-blocking
 
-module output_buffer(
+module output_buffer#(
+    parameter DATA_WIDTH = 6,   // width of input operands
+    parameter PSUM_WIDTH = 14,  // width of accumulator
+    parameter OUTR_WIDTH = 12,  // width of output buffer
+    parameter ARRAY_SIZE = 4    // width of systolic array
+)(
     // finished 14-bit signed psums from PEs (muxed outside of this module)
     input logic                     clk,
     input logic                     rst,    // GLOBAL RESET
     input logic                     flush,  // flush pulse from systo fsm
-    input logic [13:0]              psum[3:0],
+    input logic [PSUM_WIDTH-1:0]    psum[0:ARRAY_SIZE-1],
 
-    // output buffers (12-bit unsigned)
-    output logic [11:0]             outBuff[3:0]
+    // output buffers (12-bit signed)
+    output logic [OUTR_WIDTH-1:0]   outBuff[0:ARRAY_SIZE-1]
 );
 
     always_ff @(posedge flush or posedge rst) begin

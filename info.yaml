@@ -17,7 +17,7 @@ project:
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
-    - "tt_um_4x4TPU.v"
+    - "tt_um_4x4TPU.sv"
     - "control_fsm.v"
     - "IO_Interface.v"
     - "PE.v"

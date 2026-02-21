@@ -26,7 +26,7 @@ Load PE12 c_out to output buffer position 3
 Load PE03 c_out to output buffer position 4
 
 */
-module systolic_array_fsm #(
+module systolic_array_mux #(
     parameter DATA_WIDTH = 6,   // width of input operands
     parameter PSUM_WIDTH  = 14, // width of accumulator
     parameter ARRAY_SIZE = 4
