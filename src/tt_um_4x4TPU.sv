@@ -59,6 +59,31 @@ logic [PSUM_WIDTH-1:0] psum    [0:ARRAY_SIZE-1];                // Send to outpu
 // I/O
 // =========================================
 
+/*
+module IO_interface(
+    input wire clk,
+    input wire ena,                     // global enable
+    input wire rst_n,                   // active low
+
+    // physical input/output pins
+    input wire [7:0] ui_in,             // input GPIO
+    input wire [7:0] uio_in,            // bidirectional GPIO; [3:0] for input, [7:4] for output
+    output wire [7:0] uio_out,
+    output wire [7:0] uo_out,           // output GPIO
+    output wire [7:0] uio_oe,           // direction control
+
+    // register buffers in front of PEs
+    output wire [5:0] row0_val, row1_val, row2_val, row3_val,
+    output wire [5:0] col0_val, col1_val, col2_val, col3_val,
+
+    // output logic
+    input wire [11:0] out0, out1, out2, out3, // output buffer registers
+
+    // control for the systolic array
+    output wire startSysArray           // active high, pulse systolic array once all values are updated into registers
+);
+*/
+
 // io_interface_inst=============
 IO_interface io_interface_inst (
     .clk(clk),
@@ -91,6 +116,19 @@ IO_interface io_interface_inst (
     .startSysArray(startSysArray)
 );
 
+/*
+module output_buffer(
+    // finished 14-bit signed psums from PEs (muxed outside of this module)
+    input logic                     clk,
+    input logic                     rst,    // GLOBAL RESET
+    input logic                     flush,  // flush pulse from systo fsm
+    input logic [PSUM_WIDTH-1:0]    psum[0:ARRAY_SIZE-1],
+
+    // output buffers (12-bit signed)
+    output logic [OUTR_WIDTH-1:0]   outBuff[0:ARRAY_SIZE-1]
+);
+*/
+
 // output_buffer_inst============
 output_buffer #(
     .DATA_WIDTH(DATA_WIDTH),
@@ -112,6 +150,19 @@ output_buffer #(
 // Systolic Array
 // =========================================
 
+/*
+module systolic_array_fsm(
+    input logic                     clk,            
+    input logic                     rst,                // Global reset
+    input logic                     ena,                // Starts the Systolic Array
+
+    output logic                    forward_pulse,      // Send forward Pulse to all PE
+    output logic                    clear,              // Clear the selected PE 
+    output logic                    flush,              // Signal to store psum into output buffer
+    output logic [1:0]              PE_clear_select,    // Select which PE to reset
+    output logic [1:0]              c_out_select        // Select which c_out to store in output buffer
+);
+*/
 // systo_fsm_inst==================
 systolic_array_fsm systo_fsm_inst (
     .clk(clk),
@@ -125,6 +176,32 @@ systolic_array_fsm systo_fsm_inst (
     .PE_clear_select(PE_clear_select),
     .c_out_select(c_out_select)
 );
+
+/*
+module systolic_array (
+    input wire                          clk,
+    input wire                          rst,                // Global reset
+    
+    input wire                          forward_systo,      // From Systolic Array FSM, connected to all PE
+        
+    input wire                          PE_clear [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+                                                            // clear signal for all PEs
+
+    // A/BInput from Input Buffer
+    input wire [DATA_WIDTH - 1:0]       row0_val,
+    input wire [DATA_WIDTH - 1:0]       row1_val,
+    input wire [DATA_WIDTH - 1:0]       row2_val,
+    input wire [DATA_WIDTH - 1:0]       row3_val,
+
+    input wire [DATA_WIDTH - 1:0]       col0_val,
+    input wire [DATA_WIDTH - 1:0]       col1_val,
+    input wire [DATA_WIDTH - 1:0]       col2_val,
+    input wire [DATA_WIDTH - 1:0]       col3_val,
+
+    // c_out for each PEs
+    output wire [PSUM_WIDTH-1: 0] c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1]
+);
+*/
 
 // systo_array_inst=================
 systolic_array #(
@@ -153,6 +230,22 @@ systolic_array #(
     .c_out(c_out)
 );
 
+/*
+module systolic_array_mux(
+    input logic                     clk,
+    input logic                     rst,                    // Global reset
+
+    input logic                     clear,                  // Signal to clear selected PE
+    input logic [1:0]               PE_clear_select,        // Select which PEs to clear
+    input logic [PSUM_WIDTH-1: 0]   c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+                                                            // c_out wire for all PEs
+    input logic [1:0]               c_out_select,           // Select which c_out send to ReLU
+
+    output logic                    PE_clear [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+                                                            // clear wire for all PEs
+    output logic [PSUM_WIDTH-1: 0]  psum [0:ARRAY_SIZE - 1] // selected c_out, send to ReLU
+);
+*/
 // systo_mux_inst==================
 systolic_array_mux #(
     .DATA_WIDTH(DATA_WIDTH),
