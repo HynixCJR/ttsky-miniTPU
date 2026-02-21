@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "4x4 TPU"      # Project title
+  title:        "MiniTPU"      # Project title
   author:       "Albert Huang, Matthew Kong, Jiya Nair, Rivera Wijaya"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "A Tensor Processing Unit capable of computing 4x4 INT6 matrix multiplication with very high throughput"      # One line description of what your project does
+  description:  "A Tensor Processing Unit capable of computing 4x4 INT6 matrix multiplication for neural networks."      # One line description of what your project does
   language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     33000000      # Clock frequency in Hz (or 0 if not applicable)
 
@@ -18,7 +18,6 @@ project:
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
     - "tt_um_4x4TPU.sv"
-    - "control_fsm.v"
     - "IO_Interface.v"
     - "PE.v"
     - "output_buffer.sv"
