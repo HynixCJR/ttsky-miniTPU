@@ -11,7 +11,7 @@ module systolic_array #(
     
     input wire                          forward_systo,      // From Systolic Array FSM, connected to all PE
         
-    input wire                          PE_clear [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+    input wire [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0] PE_clear,
                                                             // clear signal for all PEs
 
     // A/BInput from Input Buffer
@@ -28,7 +28,7 @@ module systolic_array #(
 
 
     // c_out for each PEs
-    output wire [PSUM_WIDTH-1: 0] c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1]
+    output wire [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0] c_out
 
 );
 

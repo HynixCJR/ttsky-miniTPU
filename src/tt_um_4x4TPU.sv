@@ -35,7 +35,7 @@ logic startSysArray;                                            // Unused
 
 // output_buffer_inst Wires========
 // Output
-logic [OUTR_WIDTH-1:0] outBuff [0:ARRAY_SIZE-1];               // Send to io_interface_inst
+logic [ARRAY_SIZE-1:0][OUTR_WIDTH-1:0] outBuff;               // Send to io_interface_inst
 
 // systo_fsm_inst Wires============
 // Output
@@ -51,8 +51,8 @@ logic [PSUM_WIDTH-1:0] c_out [0:ARRAY_SIZE-1][0:ARRAY_SIZE-1];  // Send to systo
 
 // systo_mux_inst Wires=============
 // Output
-logic PE_clear [0:ARRAY_SIZE-1][0:ARRAY_SIZE-1];                // Send to systo_array_inst
-logic [PSUM_WIDTH-1:0] psum    [0:ARRAY_SIZE-1];                // Send to output_buffer_inst
+logic [ARRAY_SIZE-1:0][ARRAY_SIZE-1:0] PE_clear ;                // Send to systo_array_inst
+logic [ARRAY_SIZE-1:0][PSUM_WIDTH-1:0] psum;                // Send to output_buffer_inst
 
 
 // =========================================

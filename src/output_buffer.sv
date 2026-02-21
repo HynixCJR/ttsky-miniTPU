@@ -12,10 +12,10 @@ module output_buffer#(
     input logic                     clk,
     input logic                     rst,    // GLOBAL RESET
     input logic                     flush,  // flush pulse from systo fsm
-    input logic [PSUM_WIDTH-1:0]    psum[0:ARRAY_SIZE-1],
+    input logic [ARRAY_SIZE-1:0][PSUM_WIDTH-1:0]    psum,
 
     // output buffers (12-bit signed)
-    output logic [OUTR_WIDTH-1:0]   outBuff[0:ARRAY_SIZE-1]
+    output logic [ARRAY_SIZE-1:0][OUTR_WIDTH-1:0]   outBuff
 );
 
     always_ff @(posedge clk or posedge rst) begin

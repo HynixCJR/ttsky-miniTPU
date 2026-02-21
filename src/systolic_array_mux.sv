@@ -36,13 +36,13 @@ module systolic_array_mux #(
 
     input logic                     clear,                  // Signal to clear selected PE
     input logic [1:0]               PE_clear_select,        // Select which PEs to clear
-    input logic [PSUM_WIDTH-1: 0]   c_out [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+    input logic [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]   c_out,
                                                             // c_out wire for all PEs
     input logic [1:0]               c_out_select,           // Select which c_out send to ReLU
 
-    output logic                    PE_clear [0:ARRAY_SIZE - 1][0:ARRAY_SIZE - 1],
+    output logic [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0] PE_clear,
                                                             // clear wire for all PEs
-    output logic [PSUM_WIDTH-1: 0]  psum [0:ARRAY_SIZE - 1] // selected c_out, send to ReLU
+    output logic [ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]  psum // selected c_out, send to ReLU
 
 
 );
@@ -91,7 +91,7 @@ end
 always_comb begin
     // Default everything to 0
     for (int i = 0; i < ARRAY_SIZE; i++) begin
-        for (int j = 0; j < PSUM_WIDTH; j++) begin
+        for (int j = 0; j < ARRAY_SIZE; j++) begin
             psum[i][j] = '0;
         end
     end
