@@ -26,7 +26,7 @@ Load PE12 c_out to output buffer position 3
 Load PE03 c_out to output buffer position 4
 
 */
-module systolic_array_mux #(
+module systolic_array_ #(
     parameter DATA_WIDTH = 6,   // width of input operands
     parameter PSUM_WIDTH  = 14, // width of accumulator
     parameter ARRAY_SIZE = 4
@@ -58,31 +58,31 @@ always_comb begin
 
     case (PE_clear_select)
         2'd0: begin
-            PE_clear[0][0] = 1'b1;
-            PE_clear[3][1] = 1'b1;
-            PE_clear[2][2] = 1'b1;
-            PE_clear[1][3] = 1'b1;
+            PE_clear[0][0] = clear;
+            PE_clear[3][1] = clear;
+            PE_clear[2][2] = clear;
+            PE_clear[1][3] = clear;
         end
 
         2'd1: begin
-            PE_clear[1][0] = 1'b1;
-            PE_clear[0][1] = 1'b1;
-            PE_clear[3][2] = 1'b1;
-            PE_clear[2][3] = 1'b1;
+            PE_clear[1][0] = clear;
+            PE_clear[0][1] = clear;
+            PE_clear[3][2] = clear;
+            PE_clear[2][3] = clear;
         end
 
         2'd2: begin
-            PE_clear[2][0] = 1'b1;
-            PE_clear[1][1] = 1'b1;
-            PE_clear[0][2] = 1'b1;
-            PE_clear[3][3] = 1'b1;
+            PE_clear[2][0] = clear;
+            PE_clear[1][1] = clear;
+            PE_clear[0][2] = clear;
+            PE_clear[3][3] = clear;
         end
 
         2'd3: begin
-            PE_clear[3][0] = 1'b1;
-            PE_clear[2][1] = 1'b1;
-            PE_clear[1][2] = 1'b1;
-            PE_clear[0][3] = 1'b1;
+            PE_clear[3][0] = clear;
+            PE_clear[2][1] = clear;
+            PE_clear[1][2] = clear;
+            PE_clear[0][3] = clear;
         end
     endcase
 end
