@@ -22,9 +22,9 @@ module systolic_array_fsm#(
     parameter DATA_WIDTH = 6,   // width of input operands
     parameter PSUM_WIDTH  = 14  // width of accumulator
 )(
-    input logic                     clk,            
-    input logic                     rst,                // Global reset
-    input logic                     ena,                // Starts the Systolic Array
+    input wire                      clk,            
+    input wire                      rst,                // Global reset
+    input wire                      ena,                // Starts the Systolic Array
 
     output logic                    forward_pulse,      // Send forward Pulse to all PE
     output logic                    clear,              // Clear the selected PE 
@@ -66,8 +66,7 @@ always_comb begin
 
     case (curr_state)
         INIT:
-            if (ena)
-                next_state = UPDATE;
+            if (ena) next_state = UPDATE;
 
         UPDATE:
             next_state = FLUSH;
@@ -79,7 +78,7 @@ always_comb begin
             next_state = IDLE;
 
         IDLE:
-            next_state = UPDATE;
+            if (ena) next_state = UPDATE;
     endcase
 end
 

@@ -109,23 +109,25 @@ module handleInput(
                 first_buf: begin
                     row0_val <= matA;
                     col0_val <= matB;
-                    startSysArray <= 0;     // reset pulse
+                    startSysArray <= 0;
                     state <= second_buf;
                 end
                 second_buf: begin
                     row1_val <= matA;
                     col1_val <= matB;
+                    startSysArray <= 0;
                     state <= third_buf;
                 end
                 third_buf: begin
                     row2_val <= matA;
                     col2_val <= matB;
+                    startSysArray <= 1;     // start the systolic array computations
                     state <= fourth_buf;
                 end
                 fourth_buf: begin
                     row3_val <= matA;
                     col3_val <= matB;
-                    startSysArray <= 1;     // start the systolic array computations
+                    startSysArray <= 0;     // reset pulse
                     state <= first_buf;     // reset back to first state
                 end
             endcase

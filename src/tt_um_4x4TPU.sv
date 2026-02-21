@@ -35,7 +35,7 @@ logic startSysArray;                                            // Unused
 
 // output_buffer_inst Wires========
 // Output
-logic [OUTR_WIDTH-1:0] outBuff [ARRAY_SIZE-1:0];               // Send to io_interface_inst
+logic [OUTR_WIDTH-1:0] outBuff [0:ARRAY_SIZE-1];               // Send to io_interface_inst
 
 // systo_fsm_inst Wires============
 // Output
@@ -116,7 +116,7 @@ output_buffer #(
 systolic_array_fsm systo_fsm_inst (
     .clk(clk),
     .rst(!rst_n),
-    .ena(ena),
+    .ena(startSysArray), // editor's note: i changed this to startSysArray, otherwise it would start shifting on the second clock cycle after chip powered on
 
     // Output
     .forward_pulse(forward_systo),
