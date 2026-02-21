@@ -91,7 +91,7 @@ end
 always_comb begin
     // Default everything to 0
     for (int i = 0; i < ARRAY_SIZE; i++) begin
-        for (int j = 0; j < ARRAY_SIZE; j++) begin
+        for (int j = 0; j < PSUM_WIDTH; j++) begin
             psum[i][j] = '0;
         end
     end
