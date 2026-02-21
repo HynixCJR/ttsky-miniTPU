@@ -26,8 +26,8 @@ module processing_element #(
 wire [2*DATA_WIDTH-1:0] product;
 wire [PSUM_WIDTH-1:0] product_sum;
 
-assign product = a_in * b_in;           // Adder
-assign product_sum = product + c_reg;   // Multiplier
+assign product = $signed(a_in) * $signed(b_in);           // Adder
+assign product_sum = $signed(product) + $signed(c_reg);   // Multiplier
 
 // A/B Register
 always @(posedge clk)  

@@ -113,7 +113,8 @@ IO_interface io_interface_inst (
     .col2_val(col2_val),
     .col3_val(col3_val),
 
-    .startSysArray(startSysArray)
+    .startSysArray(startSysArray),
+    .flush(flush_systo)
 );
 
 /*

@@ -24,7 +24,8 @@ module IO_interface(
     input wire [11:0] out0, out1, out2, out3, // output buffer registers
 
     // control for the systolic array
-    output wire startSysArray           // active high, pulse systolic array once all values are updated into registers
+    output wire startSysArray,          // active high, pulse systolic array once all values are updated into registers
+    input wire flush                    // signal that indicates when output buffers are flushed to
 );
 
     assign uio_oe = 8'b11110000;        // set which bidirectional GPIO pins are being used for input and which for output
@@ -61,7 +62,8 @@ module IO_interface(
         .out0(out0),
         .out1(out1),
         .out2(out2),
-        .out3(out3)
+        .out3(out3),
+        .flush(flush)
     );
 
     assign uio_out = {output_bus[11:8], 4'b0000}; // for bidirectional output, set top 4 bits to output bus, and bottom 4 to 0s
@@ -141,7 +143,8 @@ module handleOutput(
     input wire rst_n,                   // active low
 
     output reg [11:0] outGPIO,          // 12 bit output GPIO
-    input wire [11:0] out0, out1, out2, out3 // output buffer registers
+    input wire [11:0] out0, out1, out2, out3, // output buffer registers
+    input wire flush
 );
 
     reg [2:0] state;                    // states for FSM
@@ -156,7 +159,7 @@ module handleOutput(
         if (!rst_n) begin
             // reset everything
             outGPIO <= 12'd0;           // reset output GPIO to 0
-            state <= first_buf;
+            state <= delay_one;
         end
         else if (ena) begin
             // by default just send 0s to output GPIO
@@ -166,7 +169,7 @@ module handleOutput(
             case(state)
                 delay_one: begin       // DELAY TWO CLOCK CYCLES AT THE BEGINNING before reading
                     outGPIO <= 12'd0;
-                    state <= delay_two;
+                    if (flush) state <= delay_two;
                 end
                 delay_two: begin
                     outGPIO <= 12'd0;
