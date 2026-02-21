@@ -47,7 +47,7 @@ logic [1:0] c_out_select;                                       // Send to systo
 
 // systolic_array_inst Wires========
 // Output 
-logic [PSUM_WIDTH-1:0] c_out [0:ARRAY_SIZE-1][0:ARRAY_SIZE-1];  // Send to systo_mux_inst
+logic [ARRAY_SIZE-1:0][ARRAY_SIZE-1:0][PSUM_WIDTH-1:0] c_out;  // Send to systo_mux_inst
 
 // systo_mux_inst Wires=============
 // Output
