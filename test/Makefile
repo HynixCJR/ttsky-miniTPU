@@ -48,12 +48,17 @@ WAVES ?= 1
 
 .PHONY: test-tpu test-systolic test-control test-mux test-io
 
-all: test-tpu test-systolic test-control test-mux test-io
+all: 
+	$(MAKE) test-tpu
+	$(MAKE) test-systolic
+	$(MAKE) test-control
+	$(MAKE) test-mux
+	$(MAKE) test-io
 
 test-tpu:
 	$(MAKE) clean
 	$(MAKE) sim \
-		TOPLEVEL=tt_um_4x4TPU \
+		TOPLEVEL=tb \
 		MODULE=test_tpu \
 		PYTHONPATH=$(PWD)/4x4TPU \
 		SIM_BUILD=$(PWD)/4x4TPU/test_result \
@@ -62,7 +67,7 @@ test-tpu:
 test-control:
 	$(MAKE) clean
 	$(MAKE) sim \
-		TOPLEVEL=systolic_array_fsm \
+		TOPLEVEL=tb \
 		MODULE=test_systolic_fsm \
 		PYTHONPATH=$(PWD)/systolic_fsm \
 		SIM_BUILD=$(PWD)/systolic_fsm/test_result \
@@ -70,7 +75,7 @@ test-control:
 test-systolic:
 	$(MAKE) clean
 	$(MAKE) sim \
-        TOPLEVEL=systolic_array \
+        TOPLEVEL=tb \
 		MODULE=test_systolic_array \
 		PYTHONPATH=$(PWD)/systolic_array \
 		SIM_BUILD=$(PWD)/systolic_array/test_result \
@@ -78,7 +83,7 @@ test-systolic:
 test-mux:
 	$(MAKE) clean
 	$(MAKE) sim \
-		TOPLEVEL=systolic_array_mux \
+		TOPLEVEL=tb \
 		MODULE=test_systolic_mux \
 		PYTHONPATH=$(PWD)/systolic_mux \
 		SIM_BUILD=$(PWD)/systolic_mux/test_result \
@@ -86,7 +91,7 @@ test-mux:
 test-io:
 	$(MAKE) clean
 	$(MAKE) sim \
-		TOPLEVEL=IO_interface \
+		TOPLEVEL=tb \
 		MODULE=test_IO_Interface \
 		PYTHONPATH=$(PWD)/IO_Interface \
 		SIM_BUILD=$(PWD)/IO_Interface/test_result \
