@@ -6,14 +6,21 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = tt_um_4x4TPU.sv
+PROJECT_SOURCES = tt_um_4x4TPU.sv \
+				  IO_Interface.v \
+				  output_buffer.sv \
+				  control_fsm.v \
+				  systolic_array.sv \
+				  systolic_array_mux.sv \
+				  systolic_array_fsm.sv \
+				  PE.v
 
 ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
-# VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
-VERILOG_SOURCES += $(wildcard $(SRC_DIR)/*.sv) $(wildcard $(SRC_DIR)/*.v) 
+VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+# VERILOG_SOURCES += $(wildcard $(SRC_DIR)/*.sv) $(wildcard $(SRC_DIR)/*.v) 
 else
 
 # Gate level simulation:
@@ -43,3 +50,6 @@ COCOTB_TEST_MODULES = test
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
+
+
+##
