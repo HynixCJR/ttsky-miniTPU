@@ -7,6 +7,10 @@ FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
+TOPLEVEL ?= tt_um_4x4TPU
+MODULE   ?= test_tpu
+export PYTHONPATH := $(PWD)/4x4TPU:$(PYTHONPATH)
+
 TIMESTAMP = $(shell TZ=US/Eastern date +%Y%m%d_%H:%M:%S)
 
 PROJECT_SOURCES = tt_um_4x4TPU.sv \
@@ -46,9 +50,9 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 WAVES ?= 1
 
-.PHONY: test-tpu # test-systolic test-control test-mux test-io
+.PHONY: test-tpu test-systolic test-control test-mux test-io
 
-all: test-tpu # test-systolic test-control test-mux test-io
+all: test-tpu test-systolic test-control test-mux test-io
 
 test-tpu:
 	$(MAKE) clean
@@ -59,37 +63,37 @@ test-tpu:
 		SIM_BUILD=$(PWD)/4x4TPU/test_result \
 
 
-# test-control:
-# 	$(MAKE) clean
-# 	$(MAKE) sim \
-# 		TOPLEVEL=systolic_array_fsm \
-# 		MODULE=test_systolic_fsm \
-# 		PYTHONPATH=$(PWD)/systolic_fsm \
-# 		SIM_BUILD=$(PWD)/systolic_fsm/test_result \
+test-control:
+	$(MAKE) clean
+	$(MAKE) sim \
+		TOPLEVEL=systolic_array_fsm \
+		MODULE=test_systolic_fsm \
+		PYTHONPATH=$(PWD)/systolic_fsm \
+		SIM_BUILD=$(PWD)/systolic_fsm/test_result \
 
-# test-systolic:
-# 	$(MAKE) clean
-# 	$(MAKE) sim \
-#         TOPLEVEL=systolic_array \
-# 		MODULE=test_systolic_array \
-# 		PYTHONPATH=$(PWD)/systolic_array \
-# 		SIM_BUILD=$(PWD)/systolic_array/test_result \
+test-systolic:
+	$(MAKE) clean
+	$(MAKE) sim \
+        TOPLEVEL=systolic_array \
+		MODULE=test_systolic_array \
+		PYTHONPATH=$(PWD)/systolic_array \
+		SIM_BUILD=$(PWD)/systolic_array/test_result \
 
-# test-mux:
-# 	$(MAKE) clean
-# 	$(MAKE) sim \
-# 		TOPLEVEL=systolic_array_mux \
-# 		MODULE=test_systolic_mux \
-# 		PYTHONPATH=$(PWD)/systolic_mux \
-# 		SIM_BUILD=$(PWD)/systolic_mux/test_result \
+test-mux:
+	$(MAKE) clean
+	$(MAKE) sim \
+		TOPLEVEL=systolic_array_mux \
+		MODULE=test_systolic_mux \
+		PYTHONPATH=$(PWD)/systolic_mux \
+		SIM_BUILD=$(PWD)/systolic_mux/test_result \
 
-# test-io:
-# 	$(MAKE) clean
-# 	$(MAKE) sim \
-# 		TOPLEVEL=IO_interface \
-# 		MODULE=test_IO_Interface \
-# 		PYTHONPATH=$(PWD)/IO_Interface \
-# 		SIM_BUILD=$(PWD)/IO_Interface/test_result \
+test-io:
+	$(MAKE) clean
+	$(MAKE) sim \
+		TOPLEVEL=IO_interface \
+		MODULE=test_IO_Interface \
+		PYTHONPATH=$(PWD)/IO_Interface \
+		SIM_BUILD=$(PWD)/IO_Interface/test_result \
 
 
 
