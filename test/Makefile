@@ -4,7 +4,7 @@
 # defaults
 SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
-TOPLEVEL_LANG ?= systemverilog
+TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
 TIMESTAMP = $(shell TZ=US/Eastern date +%Y%m%d_%H:%M:%S)
