@@ -3,7 +3,7 @@
 
 # defaults
 SIM ?= icarus
-FST ?= -fst # Use more efficient FST format
+# FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
