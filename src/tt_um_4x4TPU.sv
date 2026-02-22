@@ -93,15 +93,15 @@ IO_interface io_interface_inst (
     .ui_in(ui_in),
     .uio_in(uio_in),
 
-    .out0(outBuff[0]),
-    .out1(outBuff[1]),
-    .out2(outBuff[2]),
-    .out3(outBuff[3]),
-
     // Output
     .uio_out(uio_out),
     .uo_out(uo_out),
     .uio_oe(uio_oe),
+
+    .out0(outBuff[0]),
+    .out1(outBuff[1]),
+    .out2(outBuff[2]),
+    .out3(outBuff[3]),
 
     .row0_val(row0_val),
     .row1_val(row1_val),

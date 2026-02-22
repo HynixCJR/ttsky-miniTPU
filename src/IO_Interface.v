@@ -146,34 +146,24 @@ module handleOutput(
     input wire [11:0] out0, out1, out2, out3, // output buffer registers
     input wire flush
 );
-
     reg [2:0] state;                    // states for FSM
-    parameter delay_one = 3'd0;         // on VERY FIRST two clock cycles, delay by two cycles, THEN start reading
-    parameter delay_two = 3'd1;
-    parameter first_buf = 3'd2;         // first_buf = output from first output buffer, second_buf = output from second output buffer, etc.
-    parameter second_buf = 3'd3;
-    parameter third_buf = 3'd4;
-    parameter fourth_buf = 3'd5;
+    parameter IDLE = 3'd0;              // wait state
+    parameter first_buf = 3'd1;
+    parameter second_buf = 3'd2;
+    parameter third_buf = 3'd3;
+    parameter fourth_buf = 3'd4;
 
     always@(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             // reset everything
-            outGPIO <= 12'd0;           // reset output GPIO to 0
-            state <= delay_one;
+            outGPIO <= 12'd0;
+            state <= IDLE;
         end
         else if (ena) begin
-            // by default just send 0s to output GPIO
-            // assuming we haven't started a send loop
-            if (state == first_buf) outGPIO <= 12'd0;
-
             case(state)
-                delay_one: begin       // DELAY TWO CLOCK CYCLES AT THE BEGINNING before reading
-                    outGPIO <= 12'd0;
-                    if (flush) state <= delay_two;
-                end
-                delay_two: begin
-                    outGPIO <= 12'd0;
-                    state <= first_buf;
+                IDLE: begin       
+                    outGPIO <= 12'd0; // output 0s when no new data
+                    if (flush) state <= first_buf;
                 end
                 first_buf: begin
                     outGPIO <= out0;
@@ -189,10 +179,13 @@ module handleOutput(
                 end
                 fourth_buf: begin
                     outGPIO <= out3;
-                    state <= first_buf;
+                    // If a new flush arrives EXACTLY now, loop directly to read it
+                    // Otherwise, return to IDLE and output 0s
+                    if (flush) state <= first_buf;
+                    else state <= IDLE;
                 end
+                default: state <= IDLE;
             endcase
-
         end
     end
 
