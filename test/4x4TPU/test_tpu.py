@@ -42,58 +42,95 @@ async def test_project(dut):
 
     # Reset
     await reset(dut)
-
-    mat_A = [
-        [1,2,3,4],
-        [5,6,7,8],
-        [9,10,11,12],
-        [13,14,15,16]
+    matrices_A = [
+        [ # Matrix 0, just to show that it works
+            [1,2,3,4],
+            [5,6,7,8],
+            [9,10,11,12],
+            [13,14,15,16]
+        ],
+        [ # Matrix 1 (Identity-ish)
+            [1,0,0,0],
+            [0,1,0,0],
+            [0,0,1,0],
+            [0,0,0,1]
+        ],
+        [ # Matrix 2 (maxing out)
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31]
+        ],
+        [ # Matrix 3 (testing ReLU)
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31]
+        ]
     ]
-    mat_B = [
-        [17,18,19,20],
-        [21,22,23,24],
-        [25,26,27,28],
-        [29,30,31,1]
+
+    matrices_B = [
+        [ # Matrix 0, just to show that it works
+            [17,18,19,20],
+            [21,22,23,24],
+            [25,26,27,28],
+            [29,30,31,1]
+        ],
+        [ # Matrix 1 (Sequential)
+            [1,2,3,4],
+            [5,6,7,8],
+            [9,10,11,12],
+            [13,14,15,16]
+        ],
+        [ # Matrix 2 (maxing out)
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31],
+            [31,31,31,31]
+        ],
+        [ # Matrix 3 (testing ReLU)
+            [-31,-31,-31,-31],
+            [-31,-31,-31,-31],
+            [-31,-31,-31,-31],
+            [-31,-31,-31,-31]
+        ]
     ]
 
     ARRAY_SIZE = 4
-    # A 4x4 array requires 2N - 1 = 7 systolic steps to push the data completely.
-    # We add a few extra steps (zeros) to guarantee the last accumulations flush.
-    NUM_STEPS = 2 * ARRAY_SIZE - 1 + 2
+    num_matrices = len(matrices_A)
+    
+    # 4 load steps per matrix
+    # + (ARRAY_SIZE - 1) for the initial stagger delay of the last row
+    # + 4 extra steps to ensure the final outputs flush entirely through the FSM
+    NUM_STEPS = (ARRAY_SIZE * num_matrices) + (ARRAY_SIZE - 1) + 4
 
-    dut._log.info("Feeding staggered inputs into the TPU...")
+    dut._log.info(f"Feeding {num_matrices} matrices perfectly pipelined...")
 
     for step in range(NUM_STEPS):
-        # The IO_interface loops through 4 states to load the matrices row/col by row/col.
         for i in range(ARRAY_SIZE):
-            # To stagger inputs properly:
-            # Row 'i' of Matrix A is delayed by 'i' time steps.
-            # Col 'i' of Matrix B is delayed by 'i' time steps.
-            k = step - i
+            # 's' represents the active calculation step for row 'i', removing the stagger delay
+            s = step - i
 
-            # Skewed value for Matrix A (rows)
-            if 0 <= k < ARRAY_SIZE:
-                val_a = mat_A[i][k]
+            # If this row is actively processing data for any of the matrices
+            if 0 <= s < (ARRAY_SIZE * num_matrices):
+                m = s // ARRAY_SIZE # Which matrix are we on? (0, 1, or 2)
+                k = s % ARRAY_SIZE  # Which element of the row/col are we on? (0 to 3)
+                
+                val_a = matrices_A[m][i][k]
+                val_b = matrices_B[m][k][i]
             else:
+                # Padding zeros for the stagger ramp-up and ramp-down
                 val_a = 0
-
-            # Skewed value for Matrix B (columns)
-            if 0 <= k < ARRAY_SIZE:
-                val_b = mat_B[k][i]
-            else:
                 val_b = 0
 
-            # Send values to the DUT. This awaits 1 clock cycle, naturally matching 
-            # the hardware's 4-cycle FSM required to trigger startSysArray.
             await input_value(dut, val_a, val_b)
 
-    dut._log.info("Finished feeding inputs. Waiting for output buffer to clear...")
-
-    # Wait for the systo_fsm to pulse flush/clear correctly and clear outputs
-    await ClockCycles(dut.clk, 20)
-
+    dut._log.info("Finished feeding inputs. Waiting for remaining outputs to clear...")
+    
+    # Allow time for the final matrix outputs to be flushed to the GPIO
+    await ClockCycles(dut.clk, 30)
+    
     dut._log.info("Done.")
-
     # The following assersion is just an example of how to check the output values.
     # Change it to match the actual expected output of your module:
     # assert dut.uo_out.value == 0
