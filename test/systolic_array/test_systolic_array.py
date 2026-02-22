@@ -12,8 +12,8 @@ ARRAY_SIZE = 4
 @cocotb.test()
 async def test_basic_multiply(dut):
 
-    flat_array = np.array(dut.c_out)  # list of individual PSUM elements
-    c_out_2d = flat_array.reshape((ARRAY_SIZE, ARRAY_SIZE))
+    # flat_array = np.array(dut.c_out)  # list of individual PSUM elements
+    # c_out_2d = flat_array.reshape((ARRAY_SIZE, ARRAY_SIZE))
 
     """Simple sanity test"""
 

@@ -46,7 +46,7 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 WAVES ?= 1
 
-.PHONY: all test-tpu test-systolic test-control test-mux test-io
+.PHONY: test-tpu test-systolic test-control test-mux test-io
 
 all: test-tpu test-systolic test-control test-mux test-io
 
@@ -87,7 +87,7 @@ test-io:
 	$(MAKE) clean
 	$(MAKE) sim \
 		TOPLEVEL=IO_interface \
-		MODULE=test_io_interface \
+		MODULE=test_IO_Interface \
 		PYTHONPATH=$(PWD)/IO_Interface \
 		SIM_BUILD=$(PWD)/IO_Interface/test_result \
 
