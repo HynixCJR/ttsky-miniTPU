@@ -3,8 +3,6 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
 from cocotb.triggers import ClockCycles
 
-import numpy as np
-
 DATA_WIDTH = 6,     #width of input operands
 PSUM_WIDTH  = 14    #width of accumulator
 ARRAY_SIZE = 4
