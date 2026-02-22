@@ -79,6 +79,9 @@ always_comb begin
 
         IDLE:
             if (ena) next_state = UPDATE;
+
+        default: 
+            next_state = curr_state;
     endcase
 end
 
