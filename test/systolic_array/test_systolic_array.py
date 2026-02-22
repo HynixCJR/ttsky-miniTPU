@@ -15,8 +15,8 @@ async def test_basic_multiply(dut):
 
     """Simple sanity test"""
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
+    # Set the clock period to 30 ns (~33 MHz)
+    clock = Clock(dut.clk, 30, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -27,9 +27,58 @@ async def test_basic_multiply(dut):
     # Apply inputs
     dut.row0_val.value = 3
     dut.col0_val.value = 4
+    dut.row1_val.value = 0
+    dut.row2_val.value = 0
+    dut.row3_val.value = 0
+    dut.col1_val.value = 0
+    dut.col2_val.value = 0
+    dut.col3_val.value = 0
+    dut.forward_systo.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.forward_systo.value = 0
 
-    # Wait a few cycles
-    await ClockCycles(dut.clk, 5)
+    # Wait 4 clock cycles
+    await ClockCycles(dut.clk, 3)
+    dut.row0_val.value = 2
+    dut.col0_val.value = 1
+    dut.row1_val.value = 5
+    dut.row2_val.value = 0
+    dut.row3_val.value = 0
+    dut.col1_val.value = 6
+    dut.col2_val.value = 0
+    dut.col3_val.value = 0
+    dut.forward_systo.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.forward_systo.value = 0
+
+    await ClockCycles(dut.clk, 3)
+    dut.row0_val.value = 1
+    dut.col0_val.value = 2
+    dut.row1_val.value = 4
+    dut.row2_val.value = 7
+    dut.row3_val.value = 0
+    dut.col1_val.value = 2
+    dut.col2_val.value = 9
+    dut.col3_val.value = 0
+    dut.forward_systo.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.forward_systo.value = 0
+
+    await ClockCycles(dut.clk, 3)
+    dut.row0_val.value = 2
+    dut.col0_val.value = 1
+    dut.row1_val.value = 5
+    dut.row2_val.value = 7
+    dut.row3_val.value = 1
+    dut.col1_val.value = 6
+    dut.col2_val.value = 9
+    dut.col3_val.value = 2
+    dut.forward_systo.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.forward_systo.value = 0
+
+
+    await ClockCycles(dut.clk, 8)
 
     # Check result
     # assert dut.result.value == 12

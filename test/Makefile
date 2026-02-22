@@ -7,10 +7,6 @@ FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
-TOPLEVEL ?= tt_um_4x4TPU
-MODULE   ?= test_tpu
-export PYTHONPATH := $(PWD)/4x4TPU:$(PYTHONPATH)
-
 TIMESTAMP = $(shell TZ=US/Eastern date +%Y%m%d_%H:%M:%S)
 
 PROJECT_SOURCES = tt_um_4x4TPU.sv \
