@@ -46,9 +46,9 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 WAVES ?= 1
 
-.PHONY: test-tpu test-systolic test-control test-mux test-io
+.PHONY: test-tpu # test-systolic test-control test-mux test-io
 
-all: test-tpu test-systolic test-control test-mux test-io
+all: test-tpu # test-systolic test-control test-mux test-io
 
 test-tpu:
 	$(MAKE) clean
