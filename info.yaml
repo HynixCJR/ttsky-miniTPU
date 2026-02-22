@@ -30,14 +30,14 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "matA_bit0"
-  ui[1]: "matA_bit1"
-  ui[2]: "matA_bit2"
-  ui[3]: "matA_bit3"
-  ui[4]: "matA_bit4"
-  ui[5]: "matA_bit5"
-  ui[6]: "matB_bit0"
-  ui[7]: "matB_bit1"
+  ui[0]: "matB_bit4"
+  ui[1]: "matB_bit5"
+  ui[2]: "matA_bit0"
+  ui[3]: "matA_bit1"
+  ui[4]: "matA_bit2"
+  ui[5]: "matA_bit3"
+  ui[6]: "matA_bit4"
+  ui[7]: "matA_bit5"
 
   # Outputs
   uo[0]: "out_bit0"
@@ -50,10 +50,10 @@ pinout:
   uo[7]: "out_bit7"
 
   # Bidirectional pins
-  uio[0]: "matB_bit2"
-  uio[1]: "matB_bit3"
-  uio[2]: "matB_bit4"
-  uio[3]: "matB_bit5"
+  uio[0]: "matB_bit0"
+  uio[1]: "matB_bit1"
+  uio[2]: "matB_bit2"
+  uio[3]: "matB_bit3"
   uio[4]: "out_bit8"
   uio[5]: "out_bit9"
   uio[6]: "out_bit10"
