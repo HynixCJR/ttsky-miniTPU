@@ -28,7 +28,7 @@ module systolic_array #(
 
 
     // c_out for each PEs
-    output wire [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0] c_out
+    output wire [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0] c_out // [rows][cols]
 
 );
 
@@ -87,7 +87,5 @@ module systolic_array #(
             end        
         end
     endgenerate
-
-
 
 endmodule

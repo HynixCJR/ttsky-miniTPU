@@ -20,14 +20,21 @@ module output_buffer#(
 
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin // reset all output buffers
-            for (int i = 0; i < 4; i++) begin
-                outBuff[i] <= 12'd0;
+            for (int cols = 0; cols < ARRAY_SIZE; cols++) begin
+                outBuff[cols] <= '0;
             end
         end else if (flush) begin
-            for (int i = 0; i < 4; i++) begin
-                if (psum[i][13]) outBuff[i] <= 12'd0;           // ReLU component
-                else if (psum[i][12]) outBuff[i] <= 12'hFFF;    // compressing if too high
-                else outBuff[i] <= psum[i][11:0];               // otherwise set buffer to bottom 12 bits
+            for (int cols = 0; cols < ARRAY_SIZE; cols++) begin
+                // Create a temporaty wire to pass Icarus test 
+                logic [PSUM_WIDTH-1:0] tmp_psum;
+                tmp_psum = psum[cols];
+                
+                if (tmp_psum[13]) 
+                    outBuff[cols] <= '0;                            // ReLU component, Set to zero is negative
+                else if (tmp_psum[12]) 
+                    outBuff[cols] <= 12'hFFF;                       // compressing if too high
+                else 
+                    outBuff[cols] <= tmp_psum[OUTR_WIDTH-1:0];      // otherwise set buffer to bottom 12 bits
             end
         end
 

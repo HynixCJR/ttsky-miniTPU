@@ -35,25 +35,22 @@ module systolic_array_mux #(
     input logic                     rst,                    // Global reset
 
     input logic                     clear,                  // Signal to clear selected PE
-    input logic [1:0]               PE_clear_select,        // Select which PEs to clear
-    input logic [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]   c_out,
-                                                            // c_out wire for all PEs
-    input logic [1:0]               c_out_select,           // Select which c_out send to ReLU
-
+    input logic [1:0]               PE_clear_select,        // Select which PEs to clear, 4 cases
     output logic [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0] PE_clear,
                                                             // clear wire for all PEs
-    output logic [ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]  psum // selected c_out, send to ReLU
 
+    input logic [ARRAY_SIZE - 1:0][ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]   c_out,
+                                                            // c_out wire for all PEs
+    input logic [1:0]               c_out_select,           // Select which c_out send to ReLU, 4 cases
+    output logic [ARRAY_SIZE - 1:0][PSUM_WIDTH-1: 0]  psum  // selected c_out, send to ReLU
 
 );
 
 // reset MUX
 always_comb begin
     // Default everything to 0
-    for (int i = 0; i < ARRAY_SIZE; i++) begin
-        for (int j = 0; j < ARRAY_SIZE; j++) begin
-            PE_clear[i][j] = 1'b0;
-        end
+    for (int rows = 0; rows < ARRAY_SIZE; rows++) begin
+        PE_clear[rows] = '0;
     end
 
     case (PE_clear_select)
@@ -90,10 +87,8 @@ end
 // c_out MUX
 always_comb begin
     // Default everything to 0
-    for (int i = 0; i < ARRAY_SIZE; i++) begin
-        for (int j = 0; j < ARRAY_SIZE; j++) begin
-            psum[i][j] = '0;
-        end
+    for (int cols = 0; cols < ARRAY_SIZE; cols++) begin
+        psum[cols] = '0;
     end
 
     case (c_out_select)
