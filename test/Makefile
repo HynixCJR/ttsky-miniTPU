@@ -13,7 +13,7 @@ PROJECT_SOURCES = tt_um_4x4TPU.sv \
 				  systolic_array.sv \
 				  systolic_array_mux.sv \
 				  systolic_array_fsm.sv \
-				  PE.v
+				  PE.sv
 
 ifneq ($(GATES),yes)
 
