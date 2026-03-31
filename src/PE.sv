@@ -30,7 +30,7 @@ assign product = $signed(a_in) * $signed(b_in);           // Adder
 assign product_sum = $signed(product) + $signed(c_reg);   // Multiplier
 
 // A/B Register
-always @(posedge clk)  
+always @(posedge clk or posedge rst)  
 begin: AB_Register
     if(rst) begin
         a_reg <= '0;
@@ -43,7 +43,7 @@ begin: AB_Register
 end
 
 // Accumulate Register
-always @(posedge clk)  
+always @(posedge clk or posedge rst)  
 begin: Accumulate_Register
     if(rst) begin
         c_reg <= '0;
