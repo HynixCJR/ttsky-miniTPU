@@ -18,7 +18,26 @@ A 4×4 systolic array that multiplies INT6 matrices and applies ReLU, built as a
 | Clock | 33 MHz target, synthesis constrained at 20 ns |
 | Interface | 12 input bits and 12 output bits across 24 GPIO |
 | Language | SystemVerilog and Verilog-2001 |
-| Status | Hardens to GDS, passes Tiny Tapeout precheck, passes gate-level simulation |
+
+## Results
+
+The design hardens through LibreLane on Sky130A and clears all 15 Tiny Tapeout precheck items, which
+is the manufacturability gate a design has to pass before it can go to a shuttle. Gate-level
+simulation runs against the post-layout netlist, and a
+[3D render of the layout](https://hynixcjr.github.io/ttsky-miniTPU/) is published on every build.
+
+| | |
+|---|---|
+| Standard cells | 6,682, excluding fill and tap |
+| Flip-flops | 496 |
+| Die utilization | 62.7% |
+| Total wire length | 169.2 mm |
+| Precheck | 15 of 15 (Magic DRC, KLayout FEOL/BEOL/offgrid, pin, boundary, power, layer checks) |
+| Gate-level sim | Passes on the hardened netlist |
+
+Numbers are from [gds run #77](https://github.com/HynixCJR/ttsky-miniTPU/actions/runs/35283886424).
+The cell mix runs about 30% combinational logic with roughly 3,200 cells of basic NAND/NOR/AND/OR
+gates behind it, which is what you would expect from 16 MAC units and not much else.
 
 ## Architecture
 
@@ -76,8 +95,12 @@ on its own beat. The back-to-back streaming falls out of that.
 
 **Four clocks per beat.** The array only advances once every four clocks. That isn't a throughput
 target, it's what the pins allow. A beat needs eight operands at 6 bits each, and a Tiny Tapeout tile
-gives us 12 input bits, so filling one takes four cycles. PE utilization works out around 25%. The
-array is waiting on I/O rather than on arithmetic, and reworking the array wouldn't change that.
+gives us 12 input bits, so filling one takes four cycles.
+
+That sets the ceiling. Four beats per matrix pair is about 16 clocks for a 4×4 multiply once the
+pipeline is full, so 64 MACs over 16 clocks gives 4 MAC/clock, or roughly 133 MMAC/s at 33 MHz.
+Calculated from the RTL schedule, not measured on hardware. PE utilization lands around 25%: the
+array is waiting on I/O rather than arithmetic, and reworking the array wouldn't change that.
 
 **Accumulator width.** A 6-bit signed product ranges from −992 to 1024, so 12 bits. Four of them
 accumulate, which needs two more. Hence 14.
@@ -87,30 +110,6 @@ folds into that stage instead of adding one.
 
 **Saturation.** The clamp to `0xFFF` gets hit in practice. (−32)² is 1024, and four of those is
 exactly 4096, one past what 12 bits hold.
-
-## Results
-
-The design hardens through LibreLane on Sky130A and clears all 15 Tiny Tapeout precheck items, which
-is the manufacturability gate a design has to pass before it can go to a shuttle. Gate-level
-simulation runs against the post-layout netlist, and a
-[3D render of the layout](https://hynixcjr.github.io/ttsky-miniTPU/) is published on every build.
-
-| | |
-|---|---|
-| Standard cells | 6,682, excluding fill and tap |
-| Flip-flops | 496 |
-| Die utilization | 62.7% |
-| Total wire length | 169.2 mm |
-| Precheck | 15 of 15 (Magic DRC, KLayout FEOL/BEOL/offgrid, pin, boundary, power, layer checks) |
-| Gate-level sim | Passes on the hardened netlist |
-
-Numbers are from [gds run #77](https://github.com/HynixCJR/ttsky-miniTPU/actions/runs/35283886424).
-The cell mix runs about 30% combinational logic with roughly 3,200 cells of basic NAND/NOR/AND/OR
-gates behind it, which is what you would expect from 16 MAC units and not much else.
-
-On throughput: four beats per matrix pair at four clocks each is about 16 clocks for a 4×4 multiply
-once the pipeline is full. 64 MACs over 16 clocks is 4 MAC/clock, or roughly 133 MMAC/s at 33 MHz.
-That figure comes from the schedule in the RTL. We haven't measured it on hardware.
 
 ## Verification
 
