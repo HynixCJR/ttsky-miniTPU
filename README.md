@@ -131,7 +131,7 @@ the hardened netlist. Waveforms and results come back as build artifacts.
 The FSM bench is the only one that checks its own results. The full-chip test drives the right
 stimulus but its assertions are still commented out, so correctness has been confirmed by reading
 waveforms rather than by regression. Replacing that with a Python golden model and random matrix
-streams is the next thing on the list.
+streams is the next thing to do.
 
 ## Building and testing
 
@@ -158,15 +158,6 @@ docs/                datasheet source and diagrams
 .github/workflows/   gds, test, docs, fpga
 info.yaml            Tiny Tapeout metadata and pinout
 ```
-
-## Roadmap
-
-- [ ] Self-checking full-chip bench with a Python golden model and random stimulus
-- [ ] Run the per-module suites in CI, not just the top-level test
-- [ ] Real parameterization. The drain mux and the operand ports are hard-coded for 4×4, though the
-      mux collapses to a single `(row + col) mod N == select` predicate
-- [ ] One reset convention. The I/O block and the core currently use opposite polarities
-- [ ] Measure throughput against the calculated figure
 
 ## Team
 
