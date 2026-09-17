@@ -13,6 +13,9 @@ tt_submission
 src/user_config.json
 src/config_merged.json
 
+# Full-resolution source for docs/images/gds_render.jpg — 6.5 MB, kept locally only
+docs/gds_view.png
+
 # Simulation build and run outputs
 **/__pycache__/
 **/sim_build/

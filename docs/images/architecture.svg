@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arw" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#475569"/>
+    </marker>
+    <marker id="arwc" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <!-- ===== input pins ===== -->
+  <rect x="60" y="24" width="400" height="40" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="260" y="42" text-anchor="middle" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">ui_in[7:2] → matrix A    ui_in[1:0], uio_in[3:0] → matrix B</text>
+  <text x="260" y="57" text-anchor="middle" font-size="11.5" fill="#334155">12 input bits · one A element + one B element per clock</text>
+
+  <line x1="260" y1="64" x2="260" y2="92" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arw)"/>
+
+  <!-- ===== handleInput ===== -->
+  <rect x="60" y="94" width="400" height="58" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.8"/>
+  <text x="260" y="116" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">IO_Interface · handleInput</text>
+  <text x="260" y="135" text-anchor="middle" font-size="11.5" fill="#334155">4-state deserializer — fills 8 operand registers over 4 clocks,</text>
+  <text x="260" y="147" text-anchor="middle" font-size="11.5" fill="#334155">then pulses startSysArray</text>
+
+  <line x1="260" y1="152" x2="260" y2="176" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arw)"/>
+  <text x="270" y="168" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">row0..3_val, col0..3_val  (6-bit signed)</text>
+
+  <!-- ===== systolic array ===== -->
+  <rect x="60" y="178" width="400" height="236" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="1.8"/>
+  <text x="260" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">systolic_array — 16 processing elements</text>
+  <text x="260" y="216" text-anchor="middle" font-size="11.5" fill="#334155">output-stationary · A flows right, B flows down, psum stays put</text>
+
+  <g font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">
+    <text x="86" y="252">A→</text>
+    <text x="86" y="292">A→</text>
+    <text x="86" y="332">A→</text>
+    <text x="86" y="372">A→</text>
+    <text x="142" y="236" text-anchor="middle">B↓</text>
+    <text x="202" y="236" text-anchor="middle">B↓</text>
+    <text x="262" y="236" text-anchor="middle">B↓</text>
+    <text x="322" y="236" text-anchor="middle">B↓</text>
+  </g>
+
+  <g fill="#fffbeb" stroke="#d97706" stroke-width="1.4">
+    <rect x="118" y="240" width="48" height="30" rx="4"/><rect x="178" y="240" width="48" height="30" rx="4"/>
+    <rect x="238" y="240" width="48" height="30" rx="4"/><rect x="298" y="240" width="48" height="30" rx="4"/>
+    <rect x="118" y="280" width="48" height="30" rx="4"/><rect x="178" y="280" width="48" height="30" rx="4"/>
+    <rect x="238" y="280" width="48" height="30" rx="4"/><rect x="298" y="280" width="48" height="30" rx="4"/>
+    <rect x="118" y="320" width="48" height="30" rx="4"/><rect x="178" y="320" width="48" height="30" rx="4"/>
+    <rect x="238" y="320" width="48" height="30" rx="4"/><rect x="298" y="320" width="48" height="30" rx="4"/>
+    <rect x="118" y="360" width="48" height="30" rx="4"/><rect x="178" y="360" width="48" height="30" rx="4"/>
+    <rect x="238" y="360" width="48" height="30" rx="4"/><rect x="298" y="360" width="48" height="30" rx="4"/>
+  </g>
+  <g font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#78350f" text-anchor="middle">
+    <text x="142" y="260">00</text><text x="202" y="260">01</text><text x="262" y="260">02</text><text x="322" y="260">03</text>
+    <text x="142" y="300">10</text><text x="202" y="300">11</text><text x="262" y="300">12</text><text x="322" y="300">13</text>
+    <text x="142" y="340">20</text><text x="202" y="340">21</text><text x="262" y="340">22</text><text x="322" y="340">23</text>
+    <text x="142" y="380">30</text><text x="202" y="380">31</text><text x="262" y="380">32</text><text x="322" y="380">33</text>
+  </g>
+
+  <text x="370" y="300" font-size="11" font-style="italic" fill="#64748b">each PE:</text>
+  <text x="370" y="318" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">c += a·b</text>
+  <text x="370" y="336" font-size="11" font-style="italic" fill="#64748b">14-bit</text>
+  <text x="370" y="350" font-size="11" font-style="italic" fill="#64748b">accumulator</text>
+
+  <line x1="260" y1="414" x2="260" y2="438" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arw)"/>
+  <text x="270" y="430" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">c_out[4][4]  (14-bit psums)</text>
+
+  <!-- ===== mux ===== -->
+  <rect x="60" y="440" width="400" height="56" rx="6" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.8"/>
+  <text x="260" y="461" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">systolic_array_mux — anti-diagonal drain</text>
+  <text x="260" y="479" text-anchor="middle" font-size="11.5" fill="#334155">taps the 4 PEs where (row + col) mod 4 == select,</text>
+  <text x="260" y="491" text-anchor="middle" font-size="11.5" fill="#334155">and clears those same 4 for the next matrix</text>
+
+  <line x1="260" y1="496" x2="260" y2="518" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arw)"/>
+
+  <!-- ===== output buffer ===== -->
+  <rect x="60" y="520" width="400" height="48" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="1.8"/>
+  <text x="260" y="541" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">output_buffer — ReLU + saturate</text>
+  <text x="260" y="558" text-anchor="middle" font-size="11.5" fill="#334155">negative → 0 · ≥ 4096 → 0xFFF · else low 12 bits</text>
+
+  <line x1="260" y1="568" x2="260" y2="590" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arw)"/>
+
+  <!-- ===== handleOutput ===== -->
+  <rect x="60" y="592" width="400" height="44" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.8"/>
+  <text x="260" y="612" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">IO_Interface · handleOutput</text>
+  <text x="260" y="628" text-anchor="middle" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#1e293b">uo_out[7:0] + uio_out[7:4] — one 12-bit result per clock</text>
+
+  <!-- ===== FSM ===== -->
+  <rect x="540" y="178" width="320" height="318" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="700" y="204" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">systolic_array_fsm</text>
+  <text x="700" y="222" text-anchor="middle" font-size="11.5" fill="#334155">4 clocks per array beat</text>
+
+  <g fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5">
+    <rect x="612" y="240" width="176" height="34" rx="5"/>
+    <rect x="612" y="294" width="176" height="34" rx="5"/>
+    <rect x="612" y="348" width="176" height="34" rx="5"/>
+    <rect x="612" y="402" width="176" height="34" rx="5"/>
+  </g>
+  <g font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#5b21b6" text-anchor="middle">
+    <text x="700" y="261">UPDATE — forward pulse</text>
+    <text x="700" y="315">FLUSH — latch results</text>
+    <text x="700" y="369">CLEAR — zero diagonal</text>
+    <text x="700" y="423">IDLE — await next beat</text>
+  </g>
+  <g fill="none" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arwc)">
+    <line x1="700" y1="274" x2="700" y2="292"/>
+    <line x1="700" y1="328" x2="700" y2="346"/>
+    <line x1="700" y1="382" x2="700" y2="400"/>
+  </g>
+
+  <g font-size="11.5" fill="#334155" text-anchor="middle">
+    <text x="700" y="458">select_index increments each beat,</text>
+    <text x="700" y="472">rotating through the four diagonals</text>
+    <text x="700" y="486">so matrices stream with no bubble</text>
+  </g>
+
+  <!-- control arrows into datapath (separate lanes so nothing crosses) -->
+  <g fill="none" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arwc)">
+    <path d="M 612 257 L 490 257 L 490 296 L 466 296"/>
+    <path d="M 612 365 L 506 365 L 506 462 L 466 462"/>
+    <path d="M 612 311 L 478 311 L 478 540 L 466 540"/>
+  </g>
+  <g font-size="10.5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" fill="#6d28d9" text-anchor="end">
+    <text x="606" y="250">forward</text>
+    <text x="606" y="358">clear + selects</text>
+    <text x="606" y="304">flush</text>
+  </g>
+
+  <text x="60" y="652" font-size="11" font-style="italic" fill="#64748b">miniTPU · 4×4 systolic array · Sky130 · 3×2 Tiny Tapeout tiles</text>
+</svg>
