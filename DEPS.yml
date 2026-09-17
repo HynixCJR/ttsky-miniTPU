@@ -3,7 +3,7 @@
 tb_systolic_array_fsm:
   deps:
     - src/systolic_array_fsm.sv
-    - test/tb_systolic_array_fsm.sv
+    - test/systolic_fsm/tb_systolic_array_fsm.sv
   top: tb_systolic_array_fsm
 
 # DEPS configuration for IO_Interface testbench
@@ -11,19 +11,19 @@ tb_systolic_array_fsm:
 tb_IO_Interface:
   deps:
     - src/IO_Interface.v
-    - test/tb_IO_Interface.v
+    - test/IO_Interface/tb_IO_Interface.v
   top: tb_IO_Interface
 
 # DEPS configuration for tt_um_4x4TPU full system testbench
 
 tb_tt_um_4x4TPU:
   deps:
-    - src/PE.v
+    - src/PE.sv
     - src/IO_Interface.v
     - src/output_buffer.sv
     - src/systolic_array_fsm.sv
     - src/systolic_array.sv
     - src/systolic_array_mux.sv
     - src/tt_um_4x4TPU.sv
-    - test/tb_tt_um_4x4TPU.sv
+    - test/4x4TPU/tb_tpu.v
   top: tb_tt_um_4x4TPU

@@ -9,7 +9,6 @@ SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = tt_um_4x4TPU.sv \
 				  IO_Interface.v \
 				  output_buffer.sv \
-				  control_fsm.v \
 				  systolic_array.sv \
 				  systolic_array_mux.sv \
 				  systolic_array_fsm.sv \

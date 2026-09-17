@@ -1,13 +1,22 @@
 .DS_Store
 .idea
+
+# Waveforms
 *.vcd
 *.fst
 *.fst.hier
+*.wlf
+
+# Hardening / submission outputs
 runs
 tt_submission
 src/user_config.json
 src/config_merged.json
-test/sim_build
-test/__pycache__/
+
+# Simulation build and run outputs
+**/__pycache__/
+**/sim_build/
+**/test_result/
+*.vvp
 test/results.xml
 test/gate_level_netlist.v
