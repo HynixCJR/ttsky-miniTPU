@@ -90,16 +90,23 @@ exactly 4096, one past what 12 bits hold.
 
 ## Results
 
-The design hardens through LibreLane on Sky130A and passes the Tiny Tapeout precheck, which is the
-manufacturability gate a design has to clear before it can go to a shuttle. CI also runs gate-level
-simulation against the post-layout netlist and publishes a
-[3D render of the layout](https://hynixcjr.github.io/ttsky-miniTPU/) on every build.
+The design hardens through LibreLane on Sky130A and clears all 15 Tiny Tapeout precheck items, which
+is the manufacturability gate a design has to pass before it can go to a shuttle. Gate-level
+simulation runs against the post-layout netlist, and a
+[3D render of the layout](https://hynixcjr.github.io/ttsky-miniTPU/) is published on every build.
 
-<!-- TODO before publishing: pull from the latest green `gds` run summary
-     - standard cell count
-     - die utilization %
-     - worst setup / hold slack
-     These are the most concrete numbers in the project and the section is thin without them. -->
+| | |
+|---|---|
+| Standard cells | 6,682, excluding fill and tap |
+| Flip-flops | 496 |
+| Die utilization | 62.7% |
+| Total wire length | 169.2 mm |
+| Precheck | 15 of 15 (Magic DRC, KLayout FEOL/BEOL/offgrid, pin, boundary, power, layer checks) |
+| Gate-level sim | Passes on the hardened netlist |
+
+Numbers are from [gds run #77](https://github.com/HynixCJR/ttsky-miniTPU/actions/runs/35283886424).
+The cell mix runs about 30% combinational logic with roughly 3,200 cells of basic NAND/NOR/AND/OR
+gates behind it, which is what you would expect from 16 MAC units and not much else.
 
 On throughput: four beats per matrix pair at four clocks each is about 16 clocks for a 4×4 multiply
 once the pipeline is full. 64 MACs over 16 clocks is 4 MAC/clock, or roughly 133 MMAC/s at 33 MHz.
