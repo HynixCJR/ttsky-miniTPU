@@ -1,10 +1,10 @@
-# miniTPU
+# miniTPU - A 4x4 INT6 Systolic Array Matrix Multiplier ASIC
 
 A 4×4 systolic array that multiplies INT6 matrices and applies ReLU, built as an ASIC for Tiny Tapeout on SkyWater 130 nm. Inspired by Google's TPU v1.
 
 ![gds](../../workflows/gds/badge.svg) ![test](../../workflows/test/badge.svg) ![docs](../../workflows/docs/badge.svg)
 
-![miniTPU GDS layout](docs/images/gds_render.jpg)
+![miniTPU GDS layout](docs/images/gds_render.png)
 
 <sup>The hardened layout. 16 processing elements, control logic and I/O, placed and routed across 3×2 Tiny Tapeout tiles. [Explore it in 3D →](https://hynixcjr.github.io/ttsky-miniTPU/)</sup>
 
@@ -160,10 +160,7 @@ info.yaml            Tiny Tapeout metadata and pinout
 
 ## Team
 
-Built by Albert Huang, Matthew Kong, Jiya Nair and Rivera Wijaya.
-
-<!-- TODO: one line on your own contribution, e.g.
-     "I wrote the systolic core (PE, array, FSM, drain mux) and the cocotb benches." -->
+Built by [Albert Huang](https://github.com/dphhs), [Matthew Kong](https://github.com/HynixCJR), [Jiya Nair](https://github.com/Jiya-uoft) and [Rivera Wijaya](https://github.com/RiveraWijaya).
 
 ## License
 
